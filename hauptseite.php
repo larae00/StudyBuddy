@@ -43,11 +43,11 @@ $gruppen = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <p>Sie sind erfolgreich eingeloggt.</p>
 
         <h2>Gruppen, in denen Sie Mitglied sind:</h2>
-        <ul>
+        
             <?php foreach ($gruppen as $gruppe): ?>
-                <li><?= htmlspecialchars($gruppe['Bezeichnung']) ?></li>
+                <button class="gruppen"><?= htmlspecialchars($gruppe['Bezeichnung']) ?></button>
             <?php endforeach; ?>
-        </ul>
+        
 
         <p><a href="logout.php">Ausloggen</a></p>
     </div>

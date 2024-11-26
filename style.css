@@ -69,3 +69,20 @@ form button:hover {
 .links a:hover {
     text-decoration: underline;
 }
+
+.gruppen {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid #5D83B1;
+    color: black;
+    margin-bottom:10px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition-duration: 0.4s;
+  }
+
+.gruppen:hover {
+    background-color: #5D83B1;
+    color: white;
+  }
