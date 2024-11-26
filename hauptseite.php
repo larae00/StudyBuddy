@@ -6,6 +6,27 @@ if (!isset($_SESSION['benutzer_id'])) {
     header('Location: login.php');
     exit;
 }
+
+// Datenbankverbindung herstellen
+$dsn = 'mysql:host=localhost;dbname=studybuddy;charset=utf8mb4';
+$username = 'root'; // Ersetze mit deinem DB-Benutzernamen
+$password = ''; // Ersetze mit deinem DB-Passwort
+
+try {
+    $pdo = new PDO($dsn, $username, $password);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+} catch (PDOException $e) {
+    die("Datenbankverbindung fehlgeschlagen: " . $e->getMessage());
+}
+
+// Gruppen des Benutzers abrufen
+$sql = "SELECT g.Bezeichnung 
+        FROM gruppe g
+        JOIN benutzer_gruppe bg ON g.PK_Gruppe_ID = bg.PK_FK_Gruppe_ID
+        WHERE bg.PK_FK_Benutzer_ID = :userId";
+$stmt = $pdo->prepare($sql);
+$stmt->execute([':userId' => $_SESSION['benutzer_id']]);
+$gruppen = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
@@ -14,42 +35,20 @@ if (!isset($_SESSION['benutzer_id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hauptseite - StudyBuddy</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 600px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-        }
-        p {
-            text-align: center;
-        }
-        a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <h1>Willkommen, <?= htmlspecialchars($_SESSION['benutzername']) ?>!</h1>
         <p>Sie sind erfolgreich eingeloggt.</p>
+
+        <h2>Gruppen, in denen Sie Mitglied sind:</h2>
+        <ul>
+            <?php foreach ($gruppen as $gruppe): ?>
+                <li><?= htmlspecialchars($gruppe['Bezeichnung']) ?></li>
+            <?php endforeach; ?>
+        </ul>
+
         <p><a href="logout.php">Ausloggen</a></p>
     </div>
 </body>

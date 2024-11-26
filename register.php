@@ -34,6 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         // Einfügen in die Datenbank
         try {
+            // Benutzer in der Tabelle 'benutzer' einfügen
             $sql = "INSERT INTO benutzer (Benutzername, Email, PasswortHash, Vorname, Nachname) 
                     VALUES (:benutzername, :email, :passwortHash, :vorname, :nachname)";
             $stmt = $pdo->prepare($sql);
@@ -44,6 +45,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':vorname' => $vorname,
                 ':nachname' => $nachname,
             ]);
+
+            // Benutzer ID abrufen
+            $userId = $pdo->lastInsertId();
+
+            // Alle Gruppen-IDs abrufen
+            $sqlGroups = "SELECT PK_Gruppe_ID FROM gruppe";
+            $stmtGroups = $pdo->prepare($sqlGroups);
+            $stmtGroups->execute();
+            $gruppen = $stmtGroups->fetchAll(PDO::FETCH_ASSOC);
+
+            // Benutzer zu jeder Gruppe hinzufügen
+            foreach ($gruppen as $gruppe) {
+                $sqlGroup = "INSERT INTO benutzer_gruppe (PK_FK_Benutzer_ID, PK_FK_Gruppe_ID) 
+                             VALUES (:userId, :gruppeId)";
+                $stmtGroup = $pdo->prepare($sqlGroup);
+                $stmtGroup->execute([
+                    ':userId' => $userId,
+                    ':gruppeId' => $gruppe['PK_Gruppe_ID']
+                ]);
+            }
 
             // Erfolgreiche Registrierung - Weiterleitung zur Login-Seite
             $success = 'Registrierung erfolgreich! Sie können sich jetzt einloggen.';
@@ -66,67 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrierung - StudyBuddy</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-        .container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 20px;
-            background: #fff;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            text-align: center;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-        }
-        input[type="text"], input[type="email"], input[type="password"] {
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        button {
-            padding: 10px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        .error {
-            color: #d9534f;
-            margin-bottom: 15px;
-        }
-        .success {
-            color: #5cb85c;
-            margin-bottom: 15px;
-        }
-        .links {
-            text-align: center;
-            margin-top: 15px;
-        }
-        .links a {
-            color: #007bff;
-            text-decoration: none;
-        }
-        .links a:hover {
-            text-decoration: underline;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
