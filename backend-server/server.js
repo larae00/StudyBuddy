@@ -91,9 +91,6 @@ app.post('/api/login', async (req, res) => {
     }
 
     const user = result.rows[0];
-    console.log('Gefundener Benutzer:', user);
-    console.log('Eingegebenes Passwort:', passwort);
-    console.log('Gespeicherter PasswortHash:', user.passworthash);
 
     // Prüfen ob der Hash überhaupt existiert
     if (!user.passworthash) {

@@ -122,7 +122,7 @@
   button {
     width: 100%;
     padding: 0.8rem;
-    background-color: #4CAF50;
+    background-color: #5D83B1;
     color: white;
     border: none;
     border-radius: 4px;
@@ -131,7 +131,7 @@
   }
   
   button:hover {
-    background-color: #45a049;
+    background-color: #6f8caf ;
   }
   
   .error {
@@ -145,7 +145,7 @@
   }
   
   a {
-    color: #4CAF50;
+    color: #5D83B1 ;
     text-decoration: none;
   }
   </style>
