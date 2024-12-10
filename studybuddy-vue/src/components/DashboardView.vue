@@ -175,7 +175,7 @@
   }
   
   .gruppe-item.aktiv {
-    background-color: #007bff;
+    background-color: #5D83B1;
     color: white;
   }
   
@@ -209,7 +209,7 @@
   
   .own-message {
     margin-left: auto;
-    background-color: #007bff;
+    background-color: #5D83B1;
     color: white;
   }
   
@@ -240,7 +240,7 @@
   
   .chat-input button {
     padding: 0.5rem 1rem;
-    background-color: #007bff;
+    background-color: #5D83B1;
     color: white;
     border: none;
     border-radius: 4px;
@@ -248,6 +248,6 @@
   }
   
   .chat-input button:hover {
-    background-color: #0056b3;
+    background-color: #517199;
   }
   </style>
