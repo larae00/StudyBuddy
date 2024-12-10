@@ -163,6 +163,50 @@ app.get('/api/gruppen', async (req, res) => {
   }
 });
 
+// GET: Chat messages for a specific group
+app.get('/api/chat/:gruppeId', async (req, res) => {
+  try {
+    const { gruppeId } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        n.PK_Nachricht_ID,
+        n.Inhalt,
+        n.Timestamp,
+        b.Benutzername,
+        b.PK_Benutzer_ID
+      FROM nachricht n
+      JOIN benutzer b ON n.benutzer_id = b.PK_Benutzer_ID
+      JOIN chat c ON n.chat_id = c.PK_Chat_ID
+      WHERE c.PK_Chat_ID = $1
+      ORDER BY n.Timestamp ASC
+    `, [gruppeId]);
+    
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Nachrichten:', error);
+    res.status(500).json({ error: 'Serverfehler beim Abrufen der Nachrichten' });
+  }
+});
+
+// POST: New chat message
+app.post('/api/chat/:gruppeId/message', async (req, res) => {
+  try {
+    const { gruppeId } = req.params;
+    const { inhalt, benutzerId } = req.body;
+    
+    const result = await pool.query(`
+      INSERT INTO nachricht (Inhalt, chat_id, benutzer_id)
+      VALUES ($1, $2, $3)
+      RETURNING PK_Nachricht_ID, Inhalt, Timestamp
+    `, [inhalt, gruppeId, benutzerId]);
+    
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Fehler beim Speichern der Nachricht:', error);
+    res.status(500).json({ error: 'Serverfehler beim Speichern der Nachricht' });
+  }
+});
+
 // Server starten
 const PORT = 3000;
 app.listen(PORT, () => {
