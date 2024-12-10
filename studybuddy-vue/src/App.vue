@@ -1,47 +1,53 @@
 <template>
   <div id="app">
-    <h1>StudyBuddy - User Management</h1>
-    <AddUser @user-added="fetchUsers" />
-    <UserList :users="users" />
+    <router-view></router-view>
   </div>
 </template>
 
 <script>
-import UserList from './components/UserList.vue';
-import AddUser from './components/AddUser.vue';
-import axios from 'axios';
-
 export default {
-  name: 'App',
-  components: {
-    UserList,
-    AddUser,
-  },
-  data() {
-    return {
-      users: [],
-    };
-  },
-  methods: {
-    async fetchUsers() {
-      try {
-        const response = await axios.get('http://localhost:3000/api/users');
-        this.users = response.data;
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
-    },
-  },
-  created() {
-    this.fetchUsers();
-  },
-};
+  name: 'App'
+}
 </script>
 
 <style>
 #app {
   font-family: Arial, sans-serif;
-  text-align: center;
-  margin-top: 20px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #2c3e50;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #f5f5f5;
+}
+
+h1, h2 {
+  margin-bottom: 1rem;
+}
+
+.error {
+  color: #dc3545;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+button {
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 </style>
