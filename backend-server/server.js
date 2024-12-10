@@ -39,19 +39,45 @@ app.post('/api/register', async (req, res) => {
   }
 
   try {
-    // Passwort hashen
-    const saltRounds = 10;
-    const passwortHash = await bcrypt.hash(passwort, saltRounds);
+    // Transaktion starten
+    const client = await pool.connect();
+    
+    try {
+      await client.query('BEGIN');
+      
+      // Passwort hashen
+      const saltRounds = 10;
+      const passwortHash = await bcrypt.hash(passwort, saltRounds);
 
-    const result = await pool.query(
-      'INSERT INTO benutzer (Benutzername, Email, PasswortHash, Vorname, Nachname) VALUES ($1, $2, $3, $4, $5) RETURNING PK_Benutzer_ID, Benutzername, Email, Vorname, Nachname',
-      [benutzername, email, passwortHash, vorname, nachname]
-    );
+      // Benutzer einfügen
+      const userResult = await client.query(
+        'INSERT INTO benutzer (Benutzername, Email, PasswortHash, Vorname, Nachname) VALUES ($1, $2, $3, $4, $5) RETURNING PK_Benutzer_ID, Benutzername, Email, Vorname, Nachname',
+        [benutzername, email, passwortHash, vorname, nachname]
+      );
 
-    res.status(201).json({
-      message: 'Benutzer erfolgreich registriert',
-      user: result.rows[0]
-    });
+      // Alle Gruppen-IDs abrufen
+      const gruppenResult = await client.query('SELECT PK_Gruppe_ID FROM gruppe');
+      
+      // Benutzer zu allen Gruppen hinzufügen
+      for (const gruppe of gruppenResult.rows) {
+        await client.query(
+          'INSERT INTO benutzer_gruppe (PK_FK_Benutzer_ID, PK_FK_Gruppe_ID) VALUES ($1, $2)',
+          [userResult.rows[0].pk_benutzer_id, gruppe.pk_gruppe_id]
+        );
+      }
+
+      await client.query('COMMIT');
+      
+      res.status(201).json({
+        message: 'Benutzer erfolgreich registriert und allen Gruppen hinzugefügt',
+        user: userResult.rows[0]
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   } catch (error) {
     if (error.constraint === 'benutzer_benutzername_key') {
       return res.status(400).json({ error: 'Benutzername bereits vergeben' });
