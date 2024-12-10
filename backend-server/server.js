@@ -152,6 +152,17 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
+// GET: Alle Gruppen abrufen
+app.get('/api/gruppen', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT PK_Gruppe_ID, Bezeichnung FROM gruppe');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Gruppen:', error);
+    res.status(500).json({ error: 'Serverfehler beim Abrufen der Gruppen' });
+  }
+});
+
 // Server starten
 const PORT = 3000;
 app.listen(PORT, () => {
