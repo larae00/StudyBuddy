@@ -16,8 +16,22 @@
   
       <!-- Hauptbereich -->
       <div class="main-content">
-        <h1>Dashboard</h1>
-        <p>Willkommen, {{ username }}!</p>
+        <div class="header-container">
+          <div>
+            <h1>Dashboard</h1>
+            <p>Willkommen, {{ username }}!</p>
+          </div>
+          <div v-if="selectedGruppe" class="search-container">
+            <input
+              type="text"
+              v-model="searchQuery"
+              @input="searchMessages"
+              placeholder="Chat durchsuchen..."
+              class="search-input"
+            />
+          </div>
+        </div>
+  
         <div v-if="selectedGruppe" class="gruppen-details">
           <h2>{{ getSelectedGruppenName() }}</h2>
           
@@ -62,6 +76,8 @@
         selectedGruppe: null,
         chatMessages: [],
         newMessage: '',
+        searchQuery: '',
+        originalMessages: [],
       }
     },
     created() {
@@ -90,6 +106,7 @@
           const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}`)
           if (response.ok) {
             this.chatMessages = await response.json()
+            this.originalMessages = [...this.chatMessages]
             this.$nextTick(() => {
               this.scrollToBottom()
             })
@@ -135,6 +152,24 @@
       scrollToBottom() {
         const chatMessages = this.$refs.chatMessages
         chatMessages.scrollTop = chatMessages.scrollHeight
+      },
+      searchMessages() {
+        if (!this.searchQuery.trim()) {
+          this.chatMessages = [...this.originalMessages]
+          return
+        }
+
+        const query = this.searchQuery.toLowerCase()
+        this.chatMessages = this.originalMessages.filter(message => 
+          message.inhalt.toLowerCase().includes(query) ||
+          message.benutzername.toLowerCase().includes(query)
+        )
+      }
+    },
+    watch: {
+      selectedGruppe() {
+        this.searchQuery = ''
+        this.fetchChatMessages()
       }
     }
   }
@@ -249,5 +284,37 @@
   
   .chat-input button:hover {
     background-color: #517199;
+  }
+  
+  .header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+  }
+  
+  .search-container {
+    margin-top: 1rem;
+  }
+  
+  .search-input {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    width: 200px;
+  }
+  
+  .search-input:focus {
+    outline: none;
+    border-color: #5D83B1;
+  }
+  
+  .message.highlight {
+    background-color: #fff3cd;
+  }
+  
+  .own-message.highlight {
+    background-color: #7ba3d1;
   }
   </style>
