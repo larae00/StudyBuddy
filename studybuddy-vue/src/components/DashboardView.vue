@@ -8,8 +8,8 @@
         </div>
         <h1 class="app-title">StudyBuddy</h1>
       </div>
-      <div class="profile-container">
-        <img src="@/assets/logo.png" alt="Profil" class="profile-image" />
+      <div class="profile-container" @click="$router.push('/profile')">
+        <img :src="profilBild" alt="Profil" class="profile-image" />
       </div>
     </header>
 
@@ -89,6 +89,8 @@
 </template>
   
 <script>
+import { generateInitialsImage } from '../utils/profileImage'
+
 export default {
   name: 'DashboardView',
   data() {
@@ -101,6 +103,7 @@ export default {
       newMessage: '',
       searchQuery: '',
       originalMessages: [],
+      profilBild: null
     }
   },
   created() {
@@ -108,6 +111,7 @@ export default {
     if (user) {
       this.username = user.benutzername
       this.userId = user.id
+      this.profilBild = user.profilbildSpeicherort || generateInitialsImage(user.benutzername)
       this.fetchGruppen()
     }
   },

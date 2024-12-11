@@ -8,7 +8,7 @@ CREATE TABLE benutzer (
     PasswortHash VARCHAR(255) NOT NULL,
     Vorname VARCHAR(255) NOT NULL,
     Nachname VARCHAR(255) NOT NULL,
-    ProfilbildSpeicherort varchar(255)
+    ProfilbildSpeicherort TEXT
 );
 
 CREATE TABLE gruppe (

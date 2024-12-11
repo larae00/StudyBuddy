@@ -32,7 +32,7 @@ pool.connect((err, client, done) => {
 
 // POST: Benutzer registrieren
 app.post('/api/register', async (req, res) => {
-  const { benutzername, email, passwort, vorname, nachname } = req.body;
+  const { benutzername, email, passwort, vorname, nachname, profilbild } = req.body;
 
   if (!benutzername || !email || !passwort || !vorname || !nachname) {
     return res.status(400).json({ error: 'Alle Felder müssen ausgefüllt werden' });
@@ -51,8 +51,8 @@ app.post('/api/register', async (req, res) => {
 
       // Benutzer einfügen
       const userResult = await client.query(
-        'INSERT INTO benutzer (Benutzername, Email, PasswortHash, Vorname, Nachname) VALUES ($1, $2, $3, $4, $5) RETURNING PK_Benutzer_ID, Benutzername, Email, Vorname, Nachname',
-        [benutzername, email, passwortHash, vorname, nachname]
+        'INSERT INTO benutzer (Benutzername, Email, PasswortHash, Vorname, Nachname, ProfilbildSpeicherort) VALUES ($1, $2, $3, $4, $5, $6) RETURNING PK_Benutzer_ID, Benutzername, Email, Vorname, Nachname, ProfilbildSpeicherort',
+        [benutzername, email, passwortHash, vorname, nachname, profilbild]
       );
 
       // Alle Gruppen-IDs abrufen
@@ -70,7 +70,14 @@ app.post('/api/register', async (req, res) => {
       
       res.status(201).json({
         message: 'Benutzer erfolgreich registriert und allen Gruppen hinzugefügt',
-        user: userResult.rows[0]
+        user: {
+          id: userResult.rows[0].pk_benutzer_id,
+          benutzername: userResult.rows[0].benutzername,
+          email: userResult.rows[0].email,
+          vorname: userResult.rows[0].vorname,
+          nachname: userResult.rows[0].nachname,
+          profilbildSpeicherort: userResult.rows[0].profilbildspeicherort
+        }
       });
     } catch (error) {
       await client.query('ROLLBACK');
@@ -106,7 +113,8 @@ app.post('/api/login', async (req, res) => {
         Email as email,
         PasswortHash as passworthash,
         Vorname as vorname,
-        Nachname as nachname
+        Nachname as nachname,
+        ProfilbildSpeicherort as profilbildspeicherort
       FROM benutzer 
       WHERE Benutzername = $1`,
       [benutzername]
@@ -138,7 +146,8 @@ app.post('/api/login', async (req, res) => {
         benutzername: user.benutzername,
         email: user.email,
         vorname: user.vorname,
-        nachname: user.nachname
+        nachname: user.nachname,
+        profilbildSpeicherort: user.profilbildspeicherort
       }
     });
   } catch (error) {

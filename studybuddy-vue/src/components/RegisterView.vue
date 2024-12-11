@@ -56,6 +56,7 @@
   
   <script>
   import axios from 'axios'
+  import { generateInitialsImage } from '../utils/profileImage'
   
   export default {
     name: 'RegisterView',
@@ -72,17 +73,20 @@
     methods: {
     async handleRegister() {
       try {
+        const profilbild = generateInitialsImage(this.benutzername);
+        
         await axios.post('http://localhost:3000/api/register', {
           vorname: this.vorname,
           nachname: this.nachname,
           benutzername: this.benutzername,
           email: this.email,
-          passwort: this.passwort
-        })
+          passwort: this.passwort,
+          profilbild: profilbild
+        });
         
-        this.$router.push('/login')
+        this.$router.push('/login');
       } catch (error) {
-        this.error = error.response?.data?.error || 'Ein Fehler ist aufgetreten'
+        this.error = error.response?.data?.error || 'Ein Fehler ist aufgetreten';
       }
     }
   }
