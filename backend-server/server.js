@@ -207,6 +207,35 @@ app.post('/api/chat/:gruppeId/message', async (req, res) => {
   }
 });
 
+// DELETE: Delete a chat message
+app.delete('/api/chat/message/:messageId', async (req, res) => {
+  try {
+    const { messageId } = req.params;
+    const { benutzerId } = req.query;
+
+    // Überprüfe, ob die Nachricht dem Benutzer gehört
+    const checkResult = await pool.query(
+      'SELECT benutzer_id FROM nachricht WHERE PK_Nachricht_ID = $1',
+      [messageId]
+    );
+
+    if (checkResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Nachricht nicht gefunden' });
+    }
+
+    if (checkResult.rows[0].benutzer_id !== parseInt(benutzerId)) {
+      return res.status(403).json({ error: 'Keine Berechtigung zum Löschen dieser Nachricht' });
+    }
+
+    await pool.query('DELETE FROM nachricht WHERE PK_Nachricht_ID = $1', [messageId]);
+    
+    res.status(200).json({ message: 'Nachricht erfolgreich gelöscht' });
+  } catch (error) {
+    console.error('Fehler beim Löschen der Nachricht:', error);
+    res.status(500).json({ error: 'Serverfehler beim Löschen der Nachricht' });
+  }
+});
+
 // Server starten
 const PORT = 3000;
 app.listen(PORT, () => {

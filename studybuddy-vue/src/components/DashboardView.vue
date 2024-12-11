@@ -44,7 +44,15 @@
                    :class="{ 'own-message': message.pk_benutzer_id === userId }">
                 <div class="message-header">
                   <span class="username">{{ message.benutzername }}</span>
-                  <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+                  <div class="message-actions">
+                    <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+                    <button 
+                      v-if="message.pk_benutzer_id === userId" 
+                      class="delete-button"
+                      @click="deleteMessage(message.pk_nachricht_id)">
+                      ×
+                    </button>
+                  </div>
                 </div>
                 <div class="message-content">{{ message.inhalt }}</div>
               </div>
@@ -164,6 +172,35 @@
           message.inhalt.toLowerCase().includes(query) ||
           message.benutzername.toLowerCase().includes(query)
         )
+      },
+      async deleteMessage(messageId) {
+        if (!confirm('Möchten Sie diese Nachricht wirklich löschen?')) {
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/chat/message/${messageId}?benutzerId=${this.userId}`,
+            {
+              method: 'DELETE'
+            }
+          );
+
+          if (response.ok) {
+            // Nachricht aus dem lokalen State entfernen
+            this.chatMessages = this.chatMessages.filter(
+              msg => msg.pk_nachricht_id !== messageId
+            );
+            this.originalMessages = this.originalMessages.filter(
+              msg => msg.pk_nachricht_id !== messageId
+            );
+          } else {
+            const error = await response.json();
+            console.error('Fehler beim Löschen:', error);
+          }
+        } catch (error) {
+          console.error('Fehler beim Löschen der Nachricht:', error);
+        }
       }
     },
     watch: {
@@ -251,8 +288,40 @@
   .message-header {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     font-size: 0.8rem;
     margin-bottom: 0.3rem;
+  }
+  
+  .message-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .delete-button {
+    background: none;
+    border: none;
+    color: #999;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.3rem;
+    line-height: 1;
+    border-radius: 50%;
+  }
+  
+  .delete-button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    color: #666;
+  }
+  
+  .own-message .delete-button {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  
+  .own-message .delete-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
   }
   
   .message-content {
