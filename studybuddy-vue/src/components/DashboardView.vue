@@ -1,4 +1,18 @@
 <template>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-section">
+        <div class="logo-container">
+          <img src="@/assets/logo.png" alt="Logo" class="logo" />
+        </div>
+        <h1 class="app-title">StudyBuddy</h1>
+      </div>
+      <div class="profile-container">
+        <img src="@/assets/logo.png" alt="Profil" class="profile-image" />
+      </div>
+    </header>
+
     <div class="dashboard-container">
       <!-- Sidebar für Gruppen -->
       <div class="sidebar">
@@ -71,319 +85,376 @@
         </div>
       </div>
     </div>
-  </template>
+  </div>
+</template>
   
-  <script>
-  export default {
-    name: 'DashboardView',
-    data() {
-      return {
-        username: '',
-        userId: null,
-        gruppen: [],
-        selectedGruppe: null,
-        chatMessages: [],
-        newMessage: '',
-        searchQuery: '',
-        originalMessages: [],
+<script>
+export default {
+  name: 'DashboardView',
+  data() {
+    return {
+      username: '',
+      userId: null,
+      gruppen: [],
+      selectedGruppe: null,
+      chatMessages: [],
+      newMessage: '',
+      searchQuery: '',
+      originalMessages: [],
+    }
+  },
+  created() {
+    const user = JSON.parse(localStorage.getItem('user'))
+    if (user) {
+      this.username = user.benutzername
+      this.userId = user.id
+      this.fetchGruppen()
+    }
+  },
+  methods: {
+    async fetchGruppen() {
+      try {
+        const response = await fetch('http://localhost:3000/api/gruppen')
+        if (response.ok) {
+          this.gruppen = await response.json()
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Gruppen:', error)
       }
     },
-    created() {
-      const user = JSON.parse(localStorage.getItem('user'))
-      if (user) {
-        this.username = user.benutzername
-        this.userId = user.id
-        this.fetchGruppen()
-      }
-    },
-    methods: {
-      async fetchGruppen() {
-        try {
-          const response = await fetch('http://localhost:3000/api/gruppen')
-          if (response.ok) {
-            this.gruppen = await response.json()
-          }
-        } catch (error) {
-          console.error('Fehler beim Laden der Gruppen:', error)
-        }
-      },
-      async fetchChatMessages() {
-        if (!this.selectedGruppe) return
-        
-        try {
-          const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}`)
-          if (response.ok) {
-            this.chatMessages = await response.json()
-            this.originalMessages = [...this.chatMessages]
-            this.$nextTick(() => {
-              this.scrollToBottom()
-            })
-          }
-        } catch (error) {
-          console.error('Fehler beim Laden der Nachrichten:', error)
-        }
-      },
-      async sendMessage() {
-        if (!this.newMessage.trim() || !this.selectedGruppe) return
-        
-        try {
-          const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}/message`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              inhalt: this.newMessage.trim(),
-              benutzerId: this.userId
-            })
+    async fetchChatMessages() {
+      if (!this.selectedGruppe) return
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}`)
+        if (response.ok) {
+          this.chatMessages = await response.json()
+          this.originalMessages = [...this.chatMessages]
+          this.$nextTick(() => {
+            this.scrollToBottom()
           })
-          
-          if (response.ok) {
-            this.newMessage = ''
-            await this.fetchChatMessages()
-          }
-        } catch (error) {
-          console.error('Fehler beim Senden der Nachricht:', error)
         }
-      },
-      selectGruppe(gruppe) {
-        this.selectedGruppe = gruppe.pk_gruppe_id
-        this.fetchChatMessages()
-      },
-      getSelectedGruppenName() {
-        const gruppe = this.gruppen.find(g => g.pk_gruppe_id === this.selectedGruppe)
-        return gruppe ? gruppe.bezeichnung : ''
-      },
-      formatTimestamp(timestamp) {
-        return new Date(timestamp).toLocaleString()
-      },
-      scrollToBottom() {
-        const chatMessages = this.$refs.chatMessages
-        chatMessages.scrollTop = chatMessages.scrollHeight
-      },
-      searchMessages() {
-        if (!this.searchQuery.trim()) {
-          this.chatMessages = [...this.originalMessages]
-          return
-        }
-
-        const query = this.searchQuery.toLowerCase()
-        this.chatMessages = this.originalMessages.filter(message => 
-          message.inhalt.toLowerCase().includes(query) ||
-          message.benutzername.toLowerCase().includes(query)
-        )
-      },
-      async deleteMessage(messageId) {
-        if (!confirm('Möchten Sie diese Nachricht wirklich löschen?')) {
-          return;
-        }
-
-        try {
-          const response = await fetch(
-            `http://localhost:3000/api/chat/message/${messageId}?benutzerId=${this.userId}`,
-            {
-              method: 'DELETE'
-            }
-          );
-
-          if (response.ok) {
-            // Nachricht aus dem lokalen State entfernen
-            this.chatMessages = this.chatMessages.filter(
-              msg => msg.pk_nachricht_id !== messageId
-            );
-            this.originalMessages = this.originalMessages.filter(
-              msg => msg.pk_nachricht_id !== messageId
-            );
-          } else {
-            const error = await response.json();
-            console.error('Fehler beim Löschen:', error);
-          }
-        } catch (error) {
-          console.error('Fehler beim Löschen der Nachricht:', error);
-        }
+      } catch (error) {
+        console.error('Fehler beim Laden der Nachrichten:', error)
       }
     },
-    watch: {
-      selectedGruppe() {
-        this.searchQuery = ''
-        this.fetchChatMessages()
+    async sendMessage() {
+      if (!this.newMessage.trim() || !this.selectedGruppe) return
+      
+      try {
+        const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}/message`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            inhalt: this.newMessage.trim(),
+            benutzerId: this.userId
+          })
+        })
+        
+        if (response.ok) {
+          this.newMessage = ''
+          await this.fetchChatMessages()
+        }
+      } catch (error) {
+        console.error('Fehler beim Senden der Nachricht:', error)
+      }
+    },
+    selectGruppe(gruppe) {
+      this.selectedGruppe = gruppe.pk_gruppe_id
+      this.fetchChatMessages()
+    },
+    getSelectedGruppenName() {
+      const gruppe = this.gruppen.find(g => g.pk_gruppe_id === this.selectedGruppe)
+      return gruppe ? gruppe.bezeichnung : ''
+    },
+    formatTimestamp(timestamp) {
+      return new Date(timestamp).toLocaleString()
+    },
+    scrollToBottom() {
+      const chatMessages = this.$refs.chatMessages
+      chatMessages.scrollTop = chatMessages.scrollHeight
+    },
+    searchMessages() {
+      if (!this.searchQuery.trim()) {
+        this.chatMessages = [...this.originalMessages]
+        return
+      }
+
+      const query = this.searchQuery.toLowerCase()
+      this.chatMessages = this.originalMessages.filter(message => 
+        message.inhalt.toLowerCase().includes(query) ||
+        message.benutzername.toLowerCase().includes(query)
+      )
+    },
+    async deleteMessage(messageId) {
+      if (!confirm('Möchten Sie diese Nachricht wirklich löschen?')) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `http://localhost:3000/api/chat/message/${messageId}?benutzerId=${this.userId}`,
+          {
+            method: 'DELETE'
+          }
+        );
+
+        if (response.ok) {
+          // Nachricht aus dem lokalen State entfernen
+          this.chatMessages = this.chatMessages.filter(
+            msg => msg.pk_nachricht_id !== messageId
+          );
+          this.originalMessages = this.originalMessages.filter(
+            msg => msg.pk_nachricht_id !== messageId
+          );
+        } else {
+          const error = await response.json();
+          console.error('Fehler beim Löschen:', error);
+        }
+      } catch (error) {
+        console.error('Fehler beim Löschen der Nachricht:', error);
       }
     }
+  },
+  watch: {
+    selectedGruppe() {
+      this.searchQuery = ''
+      this.fetchChatMessages()
+    }
   }
-  </script>
+}
+</script>
   
-  <style scoped>
-  .dashboard-container {
-    display: flex;
-    min-height: 100vh;
-  }
+<style scoped>
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-header {
+  background-color: white;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logo-container {
+  height: 40px;
+  width: 40px;
+}
+
+.logo {
+  height: 100%;
+  width: 100%;
+  object-fit: contain;
+}
+
+.app-title {
+  font-size: 1.5rem;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: bold;
+}
+
+.profile-container {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.profile-image {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.dashboard-container {
+  display: flex;
+  min-height: 100vh;
+}
   
-  .sidebar {
-    width: 250px;
-    background-color: #f5f5f5;
-    padding: 1rem;
-    border-right: 1px solid #ddd;
-  }
+.sidebar {
+  width: 250px;
+  background-color: #f5f5f5;
+  padding: 1rem;
+  border-right: 1px solid #ddd;
+}
   
-  .main-content {
-    flex: 1;
-    padding: 2rem;
-  }
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
   
-  .gruppen-liste {
-    margin-top: 1rem;
-  }
+.gruppen-liste {
+  margin-top: 1rem;
+}
   
-  .gruppe-item {
-    padding: 0.75rem 1rem;
-    margin: 0.25rem 0;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-  }
+.gruppe-item {
+  padding: 0.75rem 1rem;
+  margin: 0.25rem 0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
   
-  .gruppe-item:hover {
-    background-color: #e0e0e0;
-  }
+.gruppe-item:hover {
+  background-color: #e0e0e0;
+}
   
-  .gruppe-item.aktiv {
-    background-color: #5D83B1;
-    color: white;
-  }
+.gruppe-item.aktiv {
+  background-color: #5D83B1;
+  color: white;
+}
   
-  h2 {
-    margin-bottom: 1rem;
-    color: #333;
-  }
+h2 {
+  margin-bottom: 1rem;
+  color: #333;
+}
   
-  .chat-container {
-    margin-top: 1rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    height: 500px;
-    display: flex;
-    flex-direction: column;
-  }
+.chat-container {
+  margin-top: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+}
   
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 1rem;
-  }
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
   
-  .message {
-    margin-bottom: 1rem;
-    padding: 0.5rem;
-    background-color: #f0f0f0;
-    border-radius: 4px;
-    max-width: 70%;
-  }
+.message {
+  margin-bottom: 1rem;
+  padding: 0.5rem;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  max-width: 70%;
+}
   
-  .own-message {
-    margin-left: auto;
-    background-color: #5D83B1;
-    color: white;
-  }
+.own-message {
+  margin-left: auto;
+  background-color: #5D83B1;
+  color: white;
+}
   
-  .message-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.8rem;
-    margin-bottom: 0.3rem;
-  }
+.message-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  margin-bottom: 0.3rem;
+}
   
-  .message-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
+.message-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
   
-  .delete-button {
-    background: none;
-    border: none;
-    color: #999;
-    font-size: 1.2rem;
-    cursor: pointer;
-    padding: 0 0.3rem;
-    line-height: 1;
-    border-radius: 50%;
-  }
+.delete-button {
+  background: none;
+  border: none;
+  color: #999;
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0 0.3rem;
+  line-height: 1;
+  border-radius: 50%;
+}
   
-  .delete-button:hover {
-    background-color: rgba(0, 0, 0, 0.1);
-    color: #666;
-  }
+.delete-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #666;
+}
   
-  .own-message .delete-button {
-    color: rgba(255, 255, 255, 0.8);
-  }
+.own-message .delete-button {
+  color: rgba(255, 255, 255, 0.8);
+}
   
-  .own-message .delete-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-  }
+.own-message .delete-button:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  color: white;
+}
   
-  .message-content {
-    word-break: break-word;
-  }
+.message-content {
+  word-break: break-word;
+}
   
-  .chat-input {
-    display: flex;
-    padding: 1rem;
-    border-top: 1px solid #ddd;
-    gap: 0.5rem;
-  }
+.chat-input {
+  display: flex;
+  padding: 1rem;
+  border-top: 1px solid #ddd;
+  gap: 0.5rem;
+}
   
-  .chat-input input {
-    flex: 1;
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
+.chat-input input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
   
-  .chat-input button {
-    padding: 0.5rem 1rem;
-    background-color: #5D83B1;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
+.chat-input button {
+  padding: 0.5rem 1rem;
+  background-color: #5D83B1;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
   
-  .chat-input button:hover {
-    background-color: #517199;
-  }
+.chat-input button:hover {
+  background-color: #517199;
+}
   
-  .header-container {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 2rem;
-  }
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+}
   
-  .search-container {
-    margin-top: 1rem;
-  }
+.search-container {
+  margin-top: 1rem;
+}
   
-  .search-input {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    width: 200px;
-  }
+.search-input {
+  padding: 0.5rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  width: 200px;
+}
   
-  .search-input:focus {
-    outline: none;
-    border-color: #5D83B1;
-  }
+.search-input:focus {
+  outline: none;
+  border-color: #5D83B1;
+}
   
-  .message.highlight {
-    background-color: #fff3cd;
-  }
+.message.highlight {
+  background-color: #fff3cd;
+}
   
-  .own-message.highlight {
-    background-color: #7ba3d1;
-  }
-  </style>
+.own-message.highlight {
+  background-color: #7ba3d1;
+}
+</style>
