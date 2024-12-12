@@ -68,19 +68,49 @@
                     </button>
                   </div>
                 </div>
-                <div class="message-content">{{ message.inhalt }}</div>
+                <div class="message-content">
+                  <div v-if="message.inhalt.startsWith('[Datei]')">
+                    <div class="file-message">
+                      <i class="fas fa-file"></i>
+                      <div class="file-info">
+                        <span class="file-name">{{ message.inhalt.replace('[Datei] ', '') }}</span>
+                        <a 
+                          :href="`http://localhost:3000/api/dokument/${message.pk_nachricht_id}`" 
+                          download 
+                          class="download-button"
+                        >
+                          <i class="fas fa-download"></i>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div v-else>
+                    {{ message.inhalt }}
+                  </div>
+                </div>
               </div>
             </div>
             
             <div class="chat-input">
-              <input 
-                v-model="newMessage" 
-                @keyup.enter="sendMessage"
-                placeholder="Nachricht eingeben..."
-                type="text"
-              />
-              <button @click="sendMessage">Senden</button>
-            </div>
+  <input 
+    v-model="newMessage" 
+    @keyup.enter="sendMessage"
+    placeholder="Nachricht eingeben..."
+    type="text"
+  />
+  <div class="file-upload">
+    <label class="file-upload-label">
+      <input
+        type="file"
+        @change="handleFileUpload"
+        accept="*/*"
+        class="file-input"
+      />
+      <i class="fas fa-paperclip"></i>
+    </label>
+  </div>
+  <button @click="sendMessage">Senden</button>
+</div>
           </div>
         </div>
       </div>
@@ -143,7 +173,7 @@ export default {
       }
     },
     async sendMessage() {
-      if (!this.newMessage.trim() || !this.selectedGruppe) return
+  if (!this.newMessage.trim() || !this.selectedGruppe) return;
       
       try {
         const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}/message`, {
@@ -155,16 +185,17 @@ export default {
             inhalt: this.newMessage.trim(),
             benutzerId: this.userId
           })
-        })
+    });
         
         if (response.ok) {
-          this.newMessage = ''
-          await this.fetchChatMessages()
+      this.newMessage = '';
+      await this.fetchChatMessages();
         }
       } catch (error) {
-        console.error('Fehler beim Senden der Nachricht:', error)
+    console.error('Fehler beim Senden der Nachricht:', error);
       }
     },
+
     selectGruppe(gruppe) {
       this.selectedGruppe = gruppe.pk_gruppe_id
       this.fetchChatMessages()
@@ -219,6 +250,28 @@ export default {
         }
       } catch (error) {
         console.error('Fehler beim Löschen der Nachricht:', error);
+      }
+    },
+    async handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('benutzerId', this.userId);
+        formData.append('gruppeId', this.selectedGruppe);
+
+        const response = await fetch('http://localhost:3000/api/dokument', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          await this.fetchChatMessages();
+        }
+      } catch (error) {
+        console.error('Fehler beim Hochladen der Datei:', error);
       }
     }
   },
@@ -460,5 +513,41 @@ h2 {
   
 .own-message.highlight {
   background-color: #7ba3d1;
+}
+
+.file-message {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+}
+
+.file-name {
+  flex: 1;
+  word-break: break-all;
+}
+
+.download-button {
+  color: inherit;
+  text-decoration: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+}
+
+.download-button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.own-message .download-button {
+  color: white;
 }
 </style>

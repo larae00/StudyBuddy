@@ -3,6 +3,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
+const fileUpload = require('express-fileupload');
 
 // Express-App erstellen
 const app = express();
@@ -10,6 +11,7 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
+app.use(fileUpload());
 
 // PostgreSQL-Konfiguration
 const pool = new Pool({
@@ -242,6 +244,84 @@ app.delete('/api/chat/message/:messageId', async (req, res) => {
   } catch (error) {
     console.error('Fehler beim Löschen der Nachricht:', error);
     res.status(500).json({ error: 'Serverfehler beim Löschen der Nachricht' });
+  }
+});
+
+// POST: Dokument hochladen
+app.post('/api/dokument', async (req, res) => {
+  if (!req.files || !req.files.file) {
+    return res.status(400).json({ error: 'Keine Datei hochgeladen' });
+  }
+
+  try {
+    const { benutzerId, gruppeId } = req.body;
+    const file = req.files.file;
+    
+    const client = await pool.connect();
+    
+    try {
+      await client.query('BEGIN');
+      
+      const nachrichtResult = await client.query(
+        'INSERT INTO nachricht (Inhalt, chat_id, benutzer_id) VALUES ($1, $2, $3) RETURNING PK_Nachricht_ID',
+        [`[Datei] ${file.name}`, gruppeId, benutzerId]
+      );
+      
+      const nachrichtId = nachrichtResult.rows[0].pk_nachricht_id;
+      const base64Data = `data:${file.mimetype};base64,${file.data.toString('base64')}`;
+      
+      await client.query(
+        'INSERT INTO dokument (PK_Dokument_ID, Bezeichnung, DateiInhalt) VALUES ($1, $2, $3)',
+        [nachrichtId, file.name, base64Data]
+      );
+      
+      await client.query('COMMIT');
+      res.status(201).json({ message: 'Dokument erfolgreich hochgeladen' });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Fehler beim Hochladen des Dokuments:', error);
+    res.status(500).json({ error: 'Serverfehler beim Hochladen des Dokuments' });
+  }
+});
+
+// GET: Dokument herunterladen
+app.get('/api/dokument/:nachrichtId', async (req, res) => {
+  try {
+    const { nachrichtId } = req.params;
+    
+    const result = await pool.query(
+      'SELECT d.DateiInhalt, d.Bezeichnung FROM dokument d WHERE d.PK_Dokument_ID = $1',
+      [nachrichtId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Dokument nicht gefunden' });
+    }
+
+    const dokument = result.rows[0];
+    const base64Data = dokument.dateiinhalt;
+    const fileName = dokument.bezeichnung;
+
+    const matches = base64Data.match(/^data:(.+);base64,(.+)$/);
+    if (!matches) {
+      throw new Error('Ungültiges Base64-Format');
+    }
+
+    const [, mimeType, base64Content] = matches;
+    const fileBuffer = Buffer.from(base64Content, 'base64');
+
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.send(fileBuffer);
+
+  } catch (error) {
+    console.error('Fehler beim Herunterladen des Dokuments:', error);
+    res.status(500).json({ error: 'Serverfehler beim Herunterladen des Dokuments' });
   }
 });
 

@@ -43,6 +43,7 @@ CREATE TABLE nachricht (
 CREATE TABLE dokument (
     PK_Dokument_ID SERIAL PRIMARY KEY,
     Bezeichnung VARCHAR(255) NOT NULL,
+     DateiInhalt TEXT NOT NULL,
     FOREIGN KEY (PK_Dokument_ID) REFERENCES nachricht(PK_Nachricht_ID)
 );
 
