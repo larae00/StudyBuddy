@@ -4,17 +4,28 @@ export function generateInitialsImage(username) {
   canvas.height = 200;
   const context = canvas.getContext('2d');
 
-  // Hintergrund mit fester Farbe
+  // Hintergrund
   context.fillStyle = '#5D83B1';
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Text
+  // Text-Einstellungen
   const initial = username.charAt(0).toUpperCase();
   context.fillStyle = 'white';
-  context.font = 'bold 100px Arial';
+  context.font = 'bold 80px Arial';  // Schriftgröße reduziert
   context.textAlign = 'center';
   context.textBaseline = 'middle';
-  context.fillText(initial, canvas.width/2, canvas.height/2);
+
+  // Exakte Zentrierung
+  const centerX = canvas.width / 2;
+  const centerY = canvas.height / 2;
+
+  // Text-Metrics für vertikale Zentrierung
+  const metrics = context.measureText(initial);
+  const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+  const adjustment = actualHeight / 2;
+
+  // Text zeichnen
+  context.fillText(initial, centerX, centerY + adjustment);
 
   return canvas.toDataURL('image/png');
 }

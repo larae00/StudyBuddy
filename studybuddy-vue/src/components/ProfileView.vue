@@ -1,12 +1,15 @@
 <template>
   <div class="profile-container">
     <div class="profile-box">
-      <h2>Mein Profil</h2>
+      <h2 class="profile-title">Mein Profil</h2>
       <div class="profile-info">
-        <div class="profile-image-container">
-          <img :src="profilBild" alt="Profilbild" class="profile-image" />
-          <div class="image-upload-overlay" @click="triggerFileInput">
-            <span>Bild ändern</span>
+        <div class="profile-image-section">
+          <div class="profile-image-container">
+            <img :src="profilBild" alt="Profilbild" class="profile-image" />
+            <div class="image-upload-overlay" @click="triggerFileInput">
+              <i class="fas fa-camera"></i>
+              <span>Bild ändern</span>
+            </div>
           </div>
           <input
             type="file"
@@ -17,14 +20,31 @@
           />
         </div>
         <div class="user-details">
-          <p><strong>Benutzername:</strong> {{ userInfo.benutzername }}</p>
-          <p><strong>Vorname:</strong> {{ userInfo.vorname }}</p>
-          <p><strong>Nachname:</strong> {{ userInfo.nachname }}</p>
-          <p><strong>E-Mail:</strong> {{ userInfo.email }}</p>
+          <div class="detail-item">
+            <label>Benutzername</label>
+            <p>{{ userInfo.benutzername }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Vorname</label>
+            <p>{{ userInfo.vorname }}</p>
+          </div>
+          <div class="detail-item">
+            <label>Nachname</label>
+            <p>{{ userInfo.nachname }}</p>
+          </div>
+          <div class="detail-item">
+            <label>E-Mail</label>
+            <p>{{ userInfo.email }}</p>
+          </div>
         </div>
       </div>
       <div class="actions">
-        <button @click="$router.push('/dashboard')">Zurück zum Dashboard</button>
+        <button @click="$router.push('/dashboard')" class="back-btn">
+          <i class="fas fa-arrow-left"></i> Zurück
+        </button>
+        <button @click="logout" class="logout-btn">
+          <i class="fas fa-sign-out-alt"></i> Abmelden
+        </button>
       </div>
     </div>
   </div>
@@ -81,7 +101,11 @@ export default {
       } catch (error) {
         console.error('Fehler beim Hochladen des Bildes:', error)
       }
-    }
+    },
+    logout() {
+    localStorage.removeItem('user')
+    this.$router.push('/login')
+  }
   }
 }
 </script>
@@ -98,80 +122,126 @@ export default {
 
 .profile-box {
   background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 3rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
-  max-width: 600px;
+  max-width: 700px;
+}
+
+.profile-title {
+  color: #2c3e50;
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
 .profile-info {
   display: flex;
-  gap: 2rem;
+  gap: 3rem;
   margin: 2rem 0;
 }
 
+.profile-image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+}
+
 .profile-image-container {
-  position: relative;
-  width: 150px;
-  height: 150px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   overflow: hidden;
-  border: 3px solid #5D83B1;
-  cursor: pointer;
+  border: 4px solid #5D83B1;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.profile-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.user-details p {
-  margin: 0.5rem 0;
+.detail-item {
+  background: #f8f9fa;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #5D83B1;
+}
+
+.detail-item label {
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 0.3rem;
+  display: block;
+}
+
+.detail-item p {
+  margin: 0;
   font-size: 1.1rem;
+  color: #2c3e50;
+  font-weight: 500;
 }
 
 .actions {
   margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
 }
 
 button {
-  padding: 0.8rem 1.5rem;
-  background-color: #5D83B1;
-  color: white;
+  padding: 0.8rem 2rem;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   font-size: 1rem;
   cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-button:hover {
-  background-color: #6f8caf;
+.back-btn {
+  background-color: #6c757d;
+  color: white;
+}
+
+.back-btn:hover {
+  background-color: #5a6268;
+}
+
+.logout-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.logout-btn:hover {
+  background-color: #c82333;
 }
 
 .image-upload-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
-  justify-content: center;
-  align-items: center;
-  opacity: 0;
-  transition: opacity 0.3s;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
-.image-upload-overlay:hover {
-  opacity: 1;
+.image-upload-overlay i {
+  font-size: 1.5rem;
 }
 
-.image-upload-overlay span {
-  color: white;
-  font-size: 1rem;
-  text-align: center;
-  padding: 0.5rem;
+@media (max-width: 768px) {
+  .profile-info {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .profile-box {
+    padding: 2rem;
+  }
 }
 </style>
