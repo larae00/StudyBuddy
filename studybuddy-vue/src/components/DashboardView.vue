@@ -3,6 +3,9 @@
     <!-- Header -->
     <header class="app-header">
       <div class="logo-section">
+        <button class="sidebar-toggle" @click="toggleSidebar">
+          <i class="fas fa-bars"></i>
+        </button>
         <div class="logo-container">
           <img src="@/assets/logo.png" alt="Logo" class="logo" />
         </div>
@@ -15,7 +18,7 @@
 
     <div class="dashboard-container">
       <!-- Sidebar für Gruppen -->
-      <div class="sidebar">
+      <div class="sidebar" :class="{ 'active': isSidebarOpen }">
         <h2>Gruppen</h2>
         <div class="gruppen-liste">
           <div v-for="gruppe in gruppen" 
@@ -133,7 +136,8 @@ export default {
       newMessage: '',
       searchQuery: '',
       originalMessages: [],
-      profilBild: null
+      profilBild: null,
+      isSidebarOpen: false
     }
   },
   created() {
@@ -273,6 +277,9 @@ export default {
       } catch (error) {
         console.error('Fehler beim Hochladen der Datei:', error);
       }
+    },
+    toggleSidebar() {
+      this.isSidebarOpen = !this.isSidebarOpen;
     }
   },
   watch: {
@@ -289,6 +296,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .app-header {
@@ -351,6 +359,7 @@ export default {
   background-color: #f5f5f5;
   padding: 1rem;
   border-right: 1px solid #ddd;
+  transition: transform 0.3s ease;
 }
   
 .main-content {
@@ -549,5 +558,245 @@ h2 {
 
 .own-message .download-button {
   color: white;
+}
+
+.sidebar-toggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #2c3e50;
+  padding: 0.5rem;
+}
+
+/* Tablet & Mobile Styles */
+@media (max-width: 768px) {
+  .sidebar-toggle {
+    display: block;
+  }
+
+  .app-header {
+    padding: 0 1rem;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 60px;
+    bottom: 0;
+    z-index: 100;
+    transform: translateX(-100%);
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .chat-container {
+    height: calc(100vh - 200px);
+  }
+
+  .message {
+    max-width: 85%;
+  }
+}
+
+/* Medium-Small Devices */
+@media (max-width: 600px) {
+  .main-content {
+    padding: 0.3rem;
+    width: 100%;
+  }
+
+  .chat-container {
+    margin: 0.3rem 0;
+    height: calc(100vh - 190px);
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+  }
+
+  .message {
+    max-width: 75%;
+    font-size: 0.85rem;
+    padding: 0.4rem;
+  }
+
+  .chat-messages {
+    padding: 0.5rem;
+  }
+
+  .message-header {
+    font-size: 0.7rem;
+  }
+
+  .header-container {
+    flex-direction: column;
+    align-items: stretch;
+    margin-bottom: 1rem;
+  }
+
+  .search-input {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  .chat-input {
+    padding: 0.4rem;
+    gap: 0.3rem;
+  }
+
+  .chat-input input {
+    padding: 0.4rem;
+    font-size: 0.85rem;
+    min-width: 0; /* Verhindert, dass Input zu breit wird */
+  }
+
+  .chat-input button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 360px) {
+  .main-content {
+    padding: 0.2rem;
+  }
+
+  .chat-container {
+    margin: 0.2rem 0;
+    height: calc(100vh - 170px);
+  }
+
+  .message {
+    max-width: 70%;
+    padding: 0.3rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .message-header {
+    font-size: 0.65rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.1rem;
+  }
+
+  .chat-input {
+    padding: 0.3rem;
+    gap: 0.2rem;
+  }
+
+  .chat-input input {
+    padding: 0.3rem;
+    font-size: 0.8rem;
+  }
+
+  .chat-input button {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.8rem;
+    min-width: 50px;
+  }
+
+  .file-message {
+    padding: 0.3rem;
+    gap: 0.3rem;
+  }
+
+  .file-name {
+    font-size: 0.75rem;
+  }
+
+  .download-button {
+    padding: 0.3rem;
+  }
+}
+
+/* Ultra Small Devices */
+@media (max-width: 320px) {
+  .message {
+    max-width: 65%;
+    font-size: 0.75rem;
+  }
+
+  .message-header {
+    font-size: 0.6rem;
+  }
+
+  .chat-input {
+    padding: 0.2rem;
+    gap: 0.2rem;
+  }
+
+  .chat-input input {
+    padding: 0.3rem;
+    font-size: 0.75rem;
+  }
+
+  .chat-input button {
+    padding: 0.3rem 0.4rem;
+    font-size: 0.75rem;
+    min-width: 45px;
+  }
+}
+.file-upload {
+  display: flex;
+  align-items: center;
+}
+
+.file-upload-label {
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  color: #5D83B1;
+}
+
+.file-upload-label:hover {
+  background-color: rgba(93, 131, 177, 0.1);
+}
+
+.file-input {
+  display: none;
+}
+
+/* Medium-Small Devices */
+@media (max-width: 600px) {
+  .file-upload-label {
+    padding: 0.4rem;
+  }
+
+  .file-upload-label i {
+    font-size: 0.9rem;
+  }
+}
+
+/* Extra Small Devices */
+@media (max-width: 360px) {
+  .file-upload-label {
+    padding: 0.3rem;
+  }
+
+  .file-upload-label i {
+    font-size: 0.85rem;
+  }
+}
+
+/* Ultra Small Devices */
+@media (max-width: 320px) {
+  .file-upload-label {
+    padding: 0.2rem;
+  }
+
+  .file-upload-label i {
+    font-size: 0.8rem;
+  }
 }
 </style>
