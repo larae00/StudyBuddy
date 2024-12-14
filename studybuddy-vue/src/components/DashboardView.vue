@@ -21,16 +21,13 @@
       <div class="sidebar" :class="{ 'active': isSidebarOpen }">
         <h2>Gruppen</h2>
         <div class="gruppen-liste">
-          <div v-for="gruppe in gruppen" 
-               :key="gruppe.pk_gruppe_id" 
-               class="gruppe-item"
-               :class="{ 'aktiv': selectedGruppe === gruppe.pk_gruppe_id }"
-               @click="selectGruppe(gruppe)">
+          <div v-for="gruppe in gruppen" :key="gruppe.pk_gruppe_id" class="gruppe-item"
+            :class="{ 'aktiv': selectedGruppe === gruppe.pk_gruppe_id }" @click="selectGruppe(gruppe)">
             {{ gruppe.bezeichnung }}
           </div>
         </div>
       </div>
-  
+
       <!-- Hauptbereich -->
       <div class="main-content">
         <div class="header-container">
@@ -39,33 +36,24 @@
             <p>Willkommen, {{ username }}!</p>
           </div>
           <div v-if="selectedGruppe" class="search-container">
-            <input
-              type="text"
-              v-model="searchQuery"
-              @input="searchMessages"
-              placeholder="Chat durchsuchen..."
-              class="search-input"
-            />
+            <input type="text" v-model="searchQuery" @input="searchMessages" placeholder="Chat durchsuchen..."
+              class="search-input" />
           </div>
         </div>
-  
+
         <div v-if="selectedGruppe" class="gruppen-details">
           <h2>{{ getSelectedGruppenName() }}</h2>
-          
+
           <!-- Chat-Bereich -->
           <div class="chat-container">
             <div class="chat-messages" ref="chatMessages">
-              <div v-for="message in chatMessages" 
-                   :key="message.pk_nachricht_id" 
-                   class="message"
-                   :class="{ 'own-message': message.pk_benutzer_id === userId }">
+              <div v-for="message in chatMessages" :key="message.pk_nachricht_id" class="message"
+                :class="{ 'own-message': message.pk_benutzer_id === userId }">
                 <div class="message-header">
                   <span class="username">{{ message.benutzername }}</span>
                   <div class="message-actions">
                     <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
-                    <button 
-                      v-if="message.pk_benutzer_id === userId" 
-                      class="delete-button"
+                    <button v-if="message.pk_benutzer_id === userId" class="delete-button"
                       @click="deleteMessage(message.pk_nachricht_id)">
                       ×
                     </button>
@@ -77,11 +65,8 @@
                       <i class="fas fa-file"></i>
                       <div class="file-info">
                         <span class="file-name">{{ message.inhalt.replace('[Datei] ', '') }}</span>
-                        <a 
-                          :href="`http://localhost:3000/api/dokument/${message.pk_nachricht_id}`" 
-                          download 
-                          class="download-button"
-                        >
+                        <a :href="`http://localhost:3000/api/dokument/${message.pk_nachricht_id}`" download
+                          class="download-button">
                           <i class="fas fa-download"></i>
                         </a>
                       </div>
@@ -93,34 +78,24 @@
                 </div>
               </div>
             </div>
-            
+
             <div class="chat-input">
-  <input 
-    v-model="newMessage" 
-    @keyup.enter="sendMessage"
-    placeholder="Nachricht eingeben..."
-    type="text"
-  />
-  <div class="file-upload">
-    <label class="file-upload-label">
-      <input
-        type="file"
-        @change="handleFileUpload"
-        accept="*/*"
-        class="file-input"
-      />
-      <i class="fas fa-paperclip"></i>
-    </label>
-  </div>
-  <button @click="sendMessage">Senden</button>
-</div>
+              <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Nachricht eingeben..." type="text" />
+              <div class="file-upload">
+                <label class="file-upload-label">
+                  <input type="file" @change="handleFileUpload" accept="*/*" class="file-input" />
+                  <i class="fas fa-paperclip"></i>
+                </label>
+              </div>
+              <button @click="sendMessage">Senden</button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
-  
+
 <script>
 import { generateInitialsImage } from '../utils/profileImage'
 
@@ -162,7 +137,7 @@ export default {
     },
     async fetchChatMessages() {
       if (!this.selectedGruppe) return
-      
+
       try {
         const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}`)
         if (response.ok) {
@@ -177,8 +152,8 @@ export default {
       }
     },
     async sendMessage() {
-  if (!this.newMessage.trim() || !this.selectedGruppe) return;
-      
+      if (!this.newMessage.trim() || !this.selectedGruppe) return;
+
       try {
         const response = await fetch(`http://localhost:3000/api/chat/${this.selectedGruppe}/message`, {
           method: 'POST',
@@ -189,14 +164,14 @@ export default {
             inhalt: this.newMessage.trim(),
             benutzerId: this.userId
           })
-    });
-        
+        });
+
         if (response.ok) {
-      this.newMessage = '';
-      await this.fetchChatMessages();
+          this.newMessage = '';
+          await this.fetchChatMessages();
         }
       } catch (error) {
-    console.error('Fehler beim Senden der Nachricht:', error);
+        console.error('Fehler beim Senden der Nachricht:', error);
       }
     },
 
@@ -222,7 +197,7 @@ export default {
       }
 
       const query = this.searchQuery.toLowerCase()
-      this.chatMessages = this.originalMessages.filter(message => 
+      this.chatMessages = this.originalMessages.filter(message =>
         message.inhalt.toLowerCase().includes(query) ||
         message.benutzername.toLowerCase().includes(query)
       )
@@ -290,7 +265,7 @@ export default {
   }
 }
 </script>
-  
+
 <style scoped>
 .app-container {
   display: flex;
@@ -353,7 +328,7 @@ export default {
   display: flex;
   min-height: 100vh;
 }
-  
+
 .sidebar {
   width: 250px;
   background-color: #f5f5f5;
@@ -361,16 +336,16 @@ export default {
   border-right: 1px solid #ddd;
   transition: transform 0.3s ease;
 }
-  
+
 .main-content {
   flex: 1;
   padding: 2rem;
 }
-  
+
 .gruppen-liste {
   margin-top: 1rem;
 }
-  
+
 .gruppe-item {
   padding: 0.75rem 1rem;
   margin: 0.25rem 0;
@@ -378,21 +353,21 @@ export default {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-  
+
 .gruppe-item:hover {
   background-color: #e0e0e0;
 }
-  
+
 .gruppe-item.aktiv {
   background-color: #5D83B1;
   color: white;
 }
-  
+
 h2 {
   margin-bottom: 1rem;
   color: #333;
 }
-  
+
 .chat-container {
   margin-top: 1rem;
   border: 1px solid #ddd;
@@ -401,13 +376,13 @@ h2 {
   display: flex;
   flex-direction: column;
 }
-  
+
 .chat-messages {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
 }
-  
+
 .message {
   margin-bottom: 1rem;
   padding: 0.5rem;
@@ -415,13 +390,13 @@ h2 {
   border-radius: 4px;
   max-width: 70%;
 }
-  
+
 .own-message {
   margin-left: auto;
   background-color: #5D83B1;
   color: white;
 }
-  
+
 .message-header {
   display: flex;
   justify-content: space-between;
@@ -429,13 +404,13 @@ h2 {
   font-size: 0.8rem;
   margin-bottom: 0.3rem;
 }
-  
+
 .message-actions {
   display: flex;
   align-items: center;
   gap: 0.5rem;
 }
-  
+
 .delete-button {
   background: none;
   border: none;
@@ -446,39 +421,39 @@ h2 {
   line-height: 1;
   border-radius: 50%;
 }
-  
+
 .delete-button:hover {
   background-color: rgba(0, 0, 0, 0.1);
   color: #666;
 }
-  
+
 .own-message .delete-button {
   color: rgba(255, 255, 255, 0.8);
 }
-  
+
 .own-message .delete-button:hover {
   background-color: rgba(255, 255, 255, 0.2);
   color: white;
 }
-  
+
 .message-content {
   word-break: break-word;
 }
-  
+
 .chat-input {
   display: flex;
   padding: 1rem;
   border-top: 1px solid #ddd;
   gap: 0.5rem;
 }
-  
+
 .chat-input input {
   flex: 1;
   padding: 0.5rem;
   border: 1px solid #ddd;
   border-radius: 4px;
 }
-  
+
 .chat-input button {
   padding: 0.5rem 1rem;
   background-color: #5D83B1;
@@ -487,22 +462,22 @@ h2 {
   border-radius: 4px;
   cursor: pointer;
 }
-  
+
 .chat-input button:hover {
   background-color: #517199;
 }
-  
+
 .header-container {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 2rem;
 }
-  
+
 .search-container {
   margin-top: 1rem;
 }
-  
+
 .search-input {
   padding: 0.5rem;
   border: 1px solid #ddd;
@@ -510,16 +485,16 @@ h2 {
   font-size: 0.9rem;
   width: 200px;
 }
-  
+
 .search-input:focus {
   outline: none;
   border-color: #5D83B1;
 }
-  
+
 .message.highlight {
   background-color: #fff3cd;
 }
-  
+
 .own-message.highlight {
   background-color: #7ba3d1;
 }
@@ -645,6 +620,7 @@ h2 {
     width: 100%;
     margin-top: 0.5rem;
   }
+
   .chat-input {
     padding: 0.4rem;
     gap: 0.3rem;
@@ -653,7 +629,8 @@ h2 {
   .chat-input input {
     padding: 0.4rem;
     font-size: 0.85rem;
-    min-width: 0; /* Verhindert, dass Input zu breit wird */
+    min-width: 0;
+    /* Verhindert, dass Input zu breit wird */
   }
 
   .chat-input button {
@@ -745,6 +722,7 @@ h2 {
     min-width: 45px;
   }
 }
+
 .file-upload {
   display: flex;
   align-items: center;

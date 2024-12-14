@@ -43,10 +43,10 @@ app.post('/api/register', async (req, res) => {
   try {
     // Transaktion starten
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       // Passwort hashen
       const saltRounds = 10;
       const passwortHash = await bcrypt.hash(passwort, saltRounds);
@@ -59,7 +59,7 @@ app.post('/api/register', async (req, res) => {
 
       // Alle Gruppen-IDs abrufen
       const gruppenResult = await client.query('SELECT PK_Gruppe_ID FROM gruppe');
-      
+
       // Benutzer zu allen Gruppen hinzufügen
       for (const gruppe of gruppenResult.rows) {
         await client.query(
@@ -69,7 +69,7 @@ app.post('/api/register', async (req, res) => {
       }
 
       await client.query('COMMIT');
-      
+
       res.status(201).json({
         message: 'Benutzer erfolgreich registriert und allen Gruppen hinzugefügt',
         user: {
@@ -191,7 +191,7 @@ app.get('/api/chat/:gruppeId', async (req, res) => {
       WHERE c.PK_Chat_ID = $1
       ORDER BY n.Timestamp ASC
     `, [gruppeId]);
-    
+
     res.json(result.rows);
   } catch (error) {
     console.error('Fehler beim Abrufen der Nachrichten:', error);
@@ -204,13 +204,13 @@ app.post('/api/chat/:gruppeId/message', async (req, res) => {
   try {
     const { gruppeId } = req.params;
     const { inhalt, benutzerId } = req.body;
-    
+
     const result = await pool.query(`
       INSERT INTO nachricht (Inhalt, chat_id, benutzer_id)
       VALUES ($1, $2, $3)
       RETURNING PK_Nachricht_ID, Inhalt, Timestamp
     `, [inhalt, gruppeId, benutzerId]);
-    
+
     res.status(201).json(result.rows[0]);
   } catch (error) {
     console.error('Fehler beim Speichern der Nachricht:', error);
@@ -223,9 +223,9 @@ app.delete('/api/chat/message/:messageId', async (req, res) => {
   try {
     const { messageId } = req.params;
     const { benutzerId } = req.query;
-    
+
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
 
@@ -245,10 +245,10 @@ app.delete('/api/chat/message/:messageId', async (req, res) => {
 
       // Zuerst den Dokument-Eintrag löschen (falls vorhanden)
       await client.query('DELETE FROM dokument WHERE PK_Dokument_ID = $1', [messageId]);
-      
+
       // Dann die Nachricht löschen
       await client.query('DELETE FROM nachricht WHERE PK_Nachricht_ID = $1', [messageId]);
-      
+
       await client.query('COMMIT');
       res.status(200).json({ message: 'Nachricht erfolgreich gelöscht' });
     } catch (error) {
@@ -272,25 +272,25 @@ app.post('/api/dokument', async (req, res) => {
   try {
     const { benutzerId, gruppeId } = req.body;
     const file = req.files.file;
-    
+
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       const nachrichtResult = await client.query(
         'INSERT INTO nachricht (Inhalt, chat_id, benutzer_id) VALUES ($1, $2, $3) RETURNING PK_Nachricht_ID',
         [`[Datei] ${file.name}`, gruppeId, benutzerId]
       );
-      
+
       const nachrichtId = nachrichtResult.rows[0].pk_nachricht_id;
       const base64Data = `data:${file.mimetype};base64,${file.data.toString('base64')}`;
-      
+
       await client.query(
         'INSERT INTO dokument (PK_Dokument_ID, Bezeichnung, DateiInhalt) VALUES ($1, $2, $3)',
         [nachrichtId, file.name, base64Data]
       );
-      
+
       await client.query('COMMIT');
       res.status(201).json({ message: 'Dokument erfolgreich hochgeladen' });
     } catch (error) {
@@ -309,7 +309,7 @@ app.post('/api/dokument', async (req, res) => {
 app.get('/api/dokument/:nachrichtId', async (req, res) => {
   try {
     const { nachrichtId } = req.params;
-    
+
     const result = await pool.query(
       'SELECT d.DateiInhalt, d.Bezeichnung FROM dokument d WHERE d.PK_Dokument_ID = $1',
       [nachrichtId]
@@ -348,10 +348,10 @@ app.put('/api/user/:userId/profileimage', async (req, res) => {
     const { profilbild } = req.body;
 
     const client = await pool.connect();
-    
+
     try {
       await client.query('BEGIN');
-      
+
       const result = await client.query(
         'UPDATE benutzer SET ProfilbildSpeicherort = $1 WHERE PK_Benutzer_ID = $2 RETURNING ProfilbildSpeicherort',
         [profilbild, userId]

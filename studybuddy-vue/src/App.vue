@@ -31,7 +31,8 @@ body {
   background-color: #f5f5f5;
 }
 
-h1, h2 {
+h1,
+h2 {
   margin-bottom: 1rem;
 }
 

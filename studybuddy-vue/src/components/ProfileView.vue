@@ -11,13 +11,7 @@
               <span>Bild ändern</span>
             </div>
           </div>
-          <input
-            type="file"
-            ref="fileInput"
-            @change="handleImageUpload"
-            accept="image/*"
-            style="display: none"
-          />
+          <input type="file" ref="fileInput" @change="handleImageUpload" accept="image/*" style="display: none" />
         </div>
         <div class="user-details">
           <div class="detail-item">
@@ -57,35 +51,35 @@ import { generateInitialsImage, resizeImage } from '../utils/profileImage'
 export default {
   name: 'ProfileView',
   data() {
-  return {
-    userInfo: {
-      id: '',
-      benutzername: '',
-      vorname: '',
-      nachname: '',
-      email: '',
-      profilbildSpeicherort: ''
+    return {
+      userInfo: {
+        id: '',
+        benutzername: '',
+        vorname: '',
+        nachname: '',
+        email: '',
+        profilbildSpeicherort: ''
+      }
     }
-  }
-},
+  },
   computed: {
     profilBild() {
       return this.userInfo.profilbildSpeicherort || generateInitialsImage(this.userInfo.benutzername)
     }
   },
   created() {
-  const user = JSON.parse(localStorage.getItem('user'))
-  if (user) {
-    this.userInfo = {
-      id: user.id,
-      benutzername: user.benutzername,
-      vorname: user.vorname,
-      nachname: user.nachname,
-      email: user.email,
-      profilbildSpeicherort: user.profilbildSpeicherort
+    const user = JSON.parse(localStorage.getItem('user'))
+    if (user) {
+      this.userInfo = {
+        id: user.id,
+        benutzername: user.benutzername,
+        vorname: user.vorname,
+        nachname: user.nachname,
+        email: user.email,
+        profilbildSpeicherort: user.profilbildSpeicherort
+      }
     }
-  }
-},
+  },
   methods: {
     triggerFileInput() {
       this.$refs.fileInput.click()
@@ -96,13 +90,13 @@ export default {
 
       try {
         const resizedImage = await resizeImage(file)
-        
+
         await axios.put(`http://localhost:3000/api/user/${this.userInfo.id}/profileimage`, {
           profilbild: resizedImage
         })
 
         this.userInfo.profilbildSpeicherort = resizedImage
-        
+
         const user = JSON.parse(localStorage.getItem('user'))
         user.profilbildSpeicherort = resizedImage
         localStorage.setItem('user', JSON.stringify(user))
@@ -111,9 +105,9 @@ export default {
       }
     },
     logout() {
-    localStorage.removeItem('user')
-    this.$router.push('/login')
-  }
+      localStorage.removeItem('user')
+      this.$router.push('/login')
+    }
   }
 }
 </script>
@@ -266,7 +260,7 @@ button {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .profile-box {
     padding: 2rem;
   }
