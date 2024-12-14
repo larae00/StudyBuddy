@@ -53,6 +53,7 @@ WITH inserted_gruppen AS (
     VALUES
     ('Allgemein'),
     ('SEW'),
+    ('INSI'),
     ('Mathematik'),
     ('Deutsch'),
     ('Englisch')

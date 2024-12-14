@@ -231,9 +231,22 @@ export default {
         console.error('Fehler beim Löschen der Nachricht:', error);
       }
     },
+    validateFileName(fileName, gruppenName) {
+      // Format: [Gruppenname]_[Thema]_x.x
+      const regex = new RegExp(`^${gruppenName}_[A-Za-z0-9]+_\\d+\\.\\d+.*$`);
+      return regex.test(fileName);
+    },
+
     async handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
+
+      const gruppenName = this.getSelectedGruppenName();
+      if (!this.validateFileName(file.name, gruppenName)) {
+        alert(`Die Datei muss dem Format "${gruppenName}_Thema_x.x" entsprechen.\nBeispiel: ${gruppenName}_Test1_1.0`);
+        event.target.value = ''; // Reset file input
+        return;
+      }
 
       try {
         const formData = new FormData();
@@ -252,6 +265,7 @@ export default {
       } catch (error) {
         console.error('Fehler beim Hochladen der Datei:', error);
       }
+
     },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;

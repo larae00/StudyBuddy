@@ -262,6 +262,11 @@ app.delete('/api/chat/message/:messageId', async (req, res) => {
     res.status(500).json({ error: 'Serverfehler beim Löschen der Nachricht' });
   }
 });
+// Hilfsfunktion zur Validierung des Dateinamens
+function validateFileName(fileName, gruppenName) {
+  const regex = new RegExp(`^${gruppenName}_[A-Za-z0-9]+_\\d+\\.\\d+.*$`);
+  return regex.test(fileName);
+}
 
 // POST: Dokument hochladen
 app.post('/api/dokument', async (req, res) => {
@@ -272,6 +277,21 @@ app.post('/api/dokument', async (req, res) => {
   try {
     const { benutzerId, gruppeId } = req.body;
     const file = req.files.file;
+
+    // Gruppenname abrufen
+    const gruppenResult = await pool.query(
+      'SELECT bezeichnung FROM gruppe WHERE pk_gruppe_id = $1',
+      [gruppeId]
+    );
+
+    const gruppenName = gruppenResult.rows[0].bezeichnung;
+
+    // Dateinamen validieren
+    if (!validateFileName(file.name, gruppenName)) {
+      return res.status(400).json({
+        error: `Die Datei muss dem Format "${gruppenName}_Thema_x.x" entsprechen`
+      });
+    }
 
     const client = await pool.connect();
 
