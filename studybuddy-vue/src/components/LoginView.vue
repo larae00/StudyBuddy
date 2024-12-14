@@ -11,14 +11,21 @@
               required
             />
           </div>
-          <div class="form-group">
-            <input
-              type="password"
-              v-model="passwort"
-              placeholder="Passwort"
-              required
-            />
-          </div>
+          <div class="form-group password-group">
+  <input
+    :type="showPassword ? 'text' : 'password'"
+    v-model="passwort"
+    placeholder="Passwort"
+    required
+  />
+  <button 
+    type="button" 
+    class="toggle-password"
+    @click="showPassword = !showPassword"
+  >
+    <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+  </button>
+</div>
           <div class="error" v-if="error">{{ error }}</div>
           <button type="submit">Anmelden</button>
         </form>
@@ -36,12 +43,13 @@
   export default {
     name: 'LoginView',
     data() {
-      return {
-        benutzername: '',
-        passwort: '',
-        error: null
-      }
-    },
+  return {
+    benutzername: '',
+    passwort: '',
+    error: null,
+    showPassword: false
+  }
+},
     methods: {
       async handleLogin() {
         try {
@@ -119,4 +127,29 @@
     color: #5D83B1;
     text-decoration: none;
   }
+  .password-group {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  width: auto;
+}
+
+.toggle-password:hover {
+  color: #5D83B1;
+  background: none;
+}
+
+.password-group input {
+  padding-right: 45px;
+}
   </style>

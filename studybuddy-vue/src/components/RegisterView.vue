@@ -35,14 +35,21 @@
               required
             />
           </div>
-          <div class="form-group">
-            <input
-              type="password"
-              v-model="passwort"
-              placeholder="Passwort"
-              required
-            />
-          </div>
+          <div class="form-group password-group">
+  <input
+    :type="showPassword ? 'text' : 'password'"
+    v-model="passwort"
+    placeholder="Passwort"
+    required
+  />
+  <button 
+    type="button" 
+    class="toggle-password"
+    @click="showPassword = !showPassword"
+  >
+    <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+  </button>
+</div>
           <div class="error" v-if="error">{{ error }}</div>
           <button type="submit">Registrieren</button>
         </form>
@@ -61,17 +68,38 @@
   export default {
     name: 'RegisterView',
     data() {
-      return {
-        vorname: '',
-        nachname: '',
-        benutzername: '',
-        email: '',
-        passwort: '',
-        error: null
-      }
-    },
-    methods: {
-    async handleRegister() {
+  return {
+    vorname: '',
+    nachname: '',
+    benutzername: '',
+    email: '',
+    passwort: '',
+    error: null,
+    showPassword: false
+  }
+},
+    methods: {validatePassword(password) {
+    const minLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (!minLength) return 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+    if (!hasUpperCase) return 'Das Passwort muss mindestens einen Großbuchstaben enthalten.';
+    if (!hasLowerCase) return 'Das Passwort muss mindestens einen Kleinbuchstaben enthalten.';
+    if (!hasNumbers) return 'Das Passwort muss mindestens eine Zahl enthalten.';
+    if (!hasSpecialChar) return 'Das Passwort muss mindestens ein Sonderzeichen enthalten.';
+
+    return null;
+  },
+
+  async handleRegister() {
+    const passwordError = this.validatePassword(this.passwort);
+    if (passwordError) {
+      this.error = passwordError;
+      return;
+    }
       try {
         const profilbild = generateInitialsImage(this.benutzername);
         
@@ -152,4 +180,29 @@
     color: #5D83B1 ;
     text-decoration: none;
   }
+  .password-group {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  width: auto;
+}
+
+.toggle-password:hover {
+  color: #5D83B1;
+  background: none;
+}
+
+.password-group input {
+  padding-right: 45px;
+}
   </style>
