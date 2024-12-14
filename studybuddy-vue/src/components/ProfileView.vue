@@ -57,27 +57,35 @@ import { generateInitialsImage, resizeImage } from '../utils/profileImage'
 export default {
   name: 'ProfileView',
   data() {
-    return {
-      userInfo: {
-        benutzername: '',
-        vorname: '',
-        nachname: '',
-        email: '',
-        profilbildSpeicherort: ''
-      }
+  return {
+    userInfo: {
+      id: '',
+      benutzername: '',
+      vorname: '',
+      nachname: '',
+      email: '',
+      profilbildSpeicherort: ''
     }
-  },
+  }
+},
   computed: {
     profilBild() {
       return this.userInfo.profilbildSpeicherort || generateInitialsImage(this.userInfo.benutzername)
     }
   },
   created() {
-    const user = JSON.parse(localStorage.getItem('user'))
-    if (user) {
-      this.userInfo = user
+  const user = JSON.parse(localStorage.getItem('user'))
+  if (user) {
+    this.userInfo = {
+      id: user.id,
+      benutzername: user.benutzername,
+      vorname: user.vorname,
+      nachname: user.nachname,
+      email: user.email,
+      profilbildSpeicherort: user.profilbildSpeicherort
     }
-  },
+  }
+},
   methods: {
     triggerFileInput() {
       this.$refs.fileInput.click()
@@ -138,24 +146,25 @@ export default {
 
 .profile-info {
   display: flex;
+  align-items: center;
   gap: 3rem;
   margin: 2rem 0;
 }
 
 .profile-image-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-around;
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
 }
 
 .profile-image-container {
-  width: 180px;
-  height: 180px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   overflow: hidden;
-  border: 4px solid #5D83B1;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: relative;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
 .user-details {
@@ -224,14 +233,32 @@ button {
 }
 
 .image-upload-overlay {
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 1rem;
+  text-align: center;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.profile-image-container:hover .image-upload-overlay {
+  opacity: 1;
 }
 
 .image-upload-overlay i {
   font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.profile-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 @media (max-width: 768px) {

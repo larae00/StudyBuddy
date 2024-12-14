@@ -37,29 +37,28 @@ export function resizeImage(file) {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_SIZE = 800;
+        const MAX_SIZE = 400;
         let width = img.width;
         let height = img.height;
 
-        if (width > height) {
-          if (width > MAX_SIZE) {
-            height *= MAX_SIZE / width;
-            width = MAX_SIZE;
-          }
-        } else {
-          if (height > MAX_SIZE) {
-            width *= MAX_SIZE / height;
-            height = MAX_SIZE;
-          }
-        }
+        const size = Math.min(width, height);
+        const startX = (width - size) / 2;
+        const startY = (height - size) / 2;
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = MAX_SIZE;
+        canvas.height = MAX_SIZE;
 
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, width, height);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, MAX_SIZE, MAX_SIZE);
+        
+        ctx.drawImage(
+          img,
+          startX, startY, size, size,
+          0, 0, MAX_SIZE, MAX_SIZE
+        );
 
-        resolve(canvas.toDataURL('image/jpeg', 0.8));
+        resolve(canvas.toDataURL('image/jpeg', 0.9));
       };
       img.onerror = reject;
       img.src = event.target.result;

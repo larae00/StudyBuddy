@@ -341,6 +341,40 @@ app.get('/api/dokument/:nachrichtId', async (req, res) => {
   }
 });
 
+// PUT: Profilbild aktualisieren
+app.put('/api/user/:userId/profileimage', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { profilbild } = req.body;
+
+    const client = await pool.connect();
+    
+    try {
+      await client.query('BEGIN');
+      
+      const result = await client.query(
+        'UPDATE benutzer SET ProfilbildSpeicherort = $1 WHERE PK_Benutzer_ID = $2 RETURNING ProfilbildSpeicherort',
+        [profilbild, userId]
+      );
+
+      if (result.rows.length === 0) {
+        throw new Error('Benutzer nicht gefunden');
+      }
+
+      await client.query('COMMIT');
+      res.json({ profilbildSpeicherort: result.rows[0].profilbildspeicherort });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren des Profilbilds:', error);
+    res.status(500).json({ error: 'Serverfehler beim Aktualisieren des Profilbilds' });
+  }
+});
+
 // Server starten
 const PORT = 3000;
 app.listen(PORT, () => {
