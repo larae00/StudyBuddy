@@ -12,6 +12,8 @@ export default {
 
 <style>
 #app {
+  --header-height: 60px;
+  --footer-height: 60px;
   font-family: Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

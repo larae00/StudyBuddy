@@ -93,11 +93,15 @@
         </div>
       </div>
     </div>
-    <div class="easyname-logo">
-      <a href="https://www.easyname.at" target="_blank" rel="noopener noreferrer">
-        <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
-      </a>
-    </div>
+
+    <!-- Neuer Footer -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <a href="https://www.easyname.at" target="_blank" rel="noopener noreferrer" class="easyname-logo">
+          <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
+        </a>
+      </div>
+    </footer>
   </div>
 </template>
 
@@ -299,7 +303,7 @@ export default {
 
 .app-header {
   background-color: white;
-  height: 60px;
+  height: var(--header-height);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -349,7 +353,7 @@ export default {
 
 .dashboard-container {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--header-height) - var(--footer-height));
 }
 
 .sidebar {
@@ -395,15 +399,17 @@ h2 {
   margin-top: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  height: 500px;
   display: flex;
   flex-direction: column;
+  height: 600px;
+  overflow: hidden;
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
+  height: calc(100% - 60px);
 }
 
 .message {
@@ -596,7 +602,7 @@ h2 {
   }
 
   .chat-container {
-    height: calc(100vh - 200px);
+    height: 500px;
   }
 
   .message {
@@ -613,7 +619,7 @@ h2 {
 
   .chat-container {
     margin: 0.3rem 0;
-    height: calc(100vh - 190px);
+    height: 450px;
     border-radius: 0;
     border-left: none;
     border-right: none;
@@ -671,7 +677,7 @@ h2 {
 
   .chat-container {
     margin: 0.2rem 0;
-    height: calc(100vh - 170px);
+    height: 400px;
   }
 
   .message {
@@ -801,11 +807,24 @@ h2 {
   }
 }
 
+/* Neue Footer Styles */
+.app-footer {
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+  padding: 1rem;
+  margin-top: auto;
+}
+
+.footer-content {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 10;
+  padding: 0 1rem;
+}
+
 .easyname-logo {
-  position: fixed;
-  left: 20px;
-  bottom: 20px;
-  z-index: 1000;
   width: 100px;
   opacity: 0.7;
   transition: opacity 0.3s ease;
@@ -823,8 +842,6 @@ h2 {
 @media (max-width: 768px) {
   .easyname-logo {
     width: 80px;
-    left: 10px;
-    bottom: 10px;
   }
 }
 </style>
