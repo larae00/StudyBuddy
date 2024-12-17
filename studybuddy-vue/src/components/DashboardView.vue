@@ -93,15 +93,11 @@
         </div>
       </div>
     </div>
-
-    <!-- Neuer Footer -->
-    <footer class="app-footer">
-      <div class="footer-content">
-        <a href="https://www.easyname.at" target="_blank" rel="noopener noreferrer" class="easyname-logo">
-          <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
-        </a>
-      </div>
-    </footer>
+    <div class="easyname-logo">
+      <a href="https://www.easyname.at" target="_blank" rel="noopener noreferrer">
+        <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
+      </a>
+    </div>
   </div>
 </template>
 
@@ -297,13 +293,13 @@ export default {
 .app-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  overflow-x: hidden;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .app-header {
   background-color: white;
-  height: var(--header-height);
+  height: 60px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -352,8 +348,9 @@ export default {
 }
 
 .dashboard-container {
+  flex: 1;
   display: flex;
-  min-height: calc(100vh - var(--header-height) - var(--footer-height));
+  min-height: 0;
 }
 
 .sidebar {
@@ -366,7 +363,10 @@ export default {
 
 .main-content {
   flex: 1;
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  min-height: 0;
 }
 
 .gruppen-liste {
@@ -395,21 +395,27 @@ h2 {
   color: #333;
 }
 
-.chat-container {
-  margin-top: 1rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+.gruppen-details {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  height: 600px;
-  overflow: hidden;
+  min-height: 0;
+}
+
+.chat-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  min-height: 0;
 }
 
 .chat-messages {
   flex: 1;
   overflow-y: auto;
   padding: 1rem;
-  height: calc(100% - 60px);
 }
 
 .message {
@@ -470,10 +476,11 @@ h2 {
 }
 
 .chat-input {
-  display: flex;
   padding: 1rem;
   border-top: 1px solid #ddd;
+  display: flex;
   gap: 0.5rem;
+  background: white;
 }
 
 .chat-input input {
@@ -602,7 +609,7 @@ h2 {
   }
 
   .chat-container {
-    height: 500px;
+    height: calc(100vh - 200px);
   }
 
   .message {
@@ -619,7 +626,7 @@ h2 {
 
   .chat-container {
     margin: 0.3rem 0;
-    height: 450px;
+    height: calc(100vh - 190px);
     border-radius: 0;
     border-left: none;
     border-right: none;
@@ -677,7 +684,7 @@ h2 {
 
   .chat-container {
     margin: 0.2rem 0;
-    height: 400px;
+    height: calc(100vh - 170px);
   }
 
   .message {
@@ -807,24 +814,11 @@ h2 {
   }
 }
 
-/* Neue Footer Styles */
-.app-footer {
-  background-color: #f8f9fa;
-  border-top: 1px solid #e9ecef;
-  padding: 1rem;
-  margin-top: auto;
-}
-
-.footer-content {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 10;
-  padding: 0 1rem;
-}
-
 .easyname-logo {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 1000;
   width: 100px;
   opacity: 0.7;
   transition: opacity 0.3s ease;
@@ -842,6 +836,8 @@ h2 {
 @media (max-width: 768px) {
   .easyname-logo {
     width: 80px;
+    left: 10px;
+    bottom: 10px;
   }
 }
 </style>
