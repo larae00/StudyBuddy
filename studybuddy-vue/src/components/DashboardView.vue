@@ -26,6 +26,11 @@
             {{ gruppe.bezeichnung }}
           </div>
         </div>
+        <div class="easyname-logo">
+      <a href="https://www.easyname.at" target="_blank" rel="noopener noreferrer">
+        <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
+      </a>
+    </div>
       </div>
 
       <!-- Hauptbereich -->
@@ -93,11 +98,7 @@
         </div>
       </div>
     </div>
-    <div class="easyname-logo">
-      <a href="https://www.easyname.at" target="_blank" rel="noopener noreferrer">
-        <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
-      </a>
-    </div>
+    
   </div>
 </template>
 
