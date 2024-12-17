@@ -98,16 +98,6 @@
         <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
       </a>
     </div>
-    <div v-if="showDeletePopup" class="popup-overlay">
-      <div class="popup-content">
-        <h3>Nachricht löschen</h3>
-        <p>Möchten Sie diese Nachricht wirklich löschen?</p>
-        <div class="popup-buttons">
-          <button class="cancel-button" @click="cancelDelete">Abbrechen</button>
-          <button class="confirm-button" @click="confirmDelete">Löschen</button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -127,9 +117,7 @@ export default {
       searchQuery: '',
       originalMessages: [],
       profilBild: null,
-      isSidebarOpen: false,
-      showDeletePopup: false,
-      messageToDelete: null,
+      isSidebarOpen: false
     }
   },
   created() {
@@ -147,6 +135,10 @@ export default {
         const response = await fetch('http://localhost:3000/api/gruppen')
         if (response.ok) {
           this.gruppen = await response.json()
+          const allgemeinGruppe = this.gruppen.find(gruppe => gruppe.bezeichnung === 'Allgemein')
+          if (allgemeinGruppe) {
+            this.selectGruppe(allgemeinGruppe)
+          }
         }
       } catch (error) {
         console.error('Fehler beim Laden der Gruppen:', error)
@@ -219,25 +211,26 @@ export default {
         message.benutzername.toLowerCase().includes(query)
       )
     },
-    deleteMessage(messageId) {
-      this.messageToDelete = messageId;
-      this.showDeletePopup = true;
-    },
-    async confirmDelete() {
+    async deleteMessage(messageId) {
+      if (!confirm('Möchten Sie diese Nachricht wirklich löschen?')) {
+        return;
+      }
+
       try {
         const response = await fetch(
-          `http://localhost:3000/api/chat/message/${this.messageToDelete}?benutzerId=${this.userId}`,
+          `http://localhost:3000/api/chat/message/${messageId}?benutzerId=${this.userId}`,
           {
             method: 'DELETE'
           }
         );
 
         if (response.ok) {
+          // Nachricht aus dem lokalen State entfernen
           this.chatMessages = this.chatMessages.filter(
-            msg => msg.pk_nachricht_id !== this.messageToDelete
+            msg => msg.pk_nachricht_id !== messageId
           );
           this.originalMessages = this.originalMessages.filter(
-            msg => msg.pk_nachricht_id !== this.messageToDelete
+            msg => msg.pk_nachricht_id !== messageId
           );
         } else {
           const error = await response.json();
@@ -246,14 +239,6 @@ export default {
       } catch (error) {
         console.error('Fehler beim Löschen der Nachricht:', error);
       }
-      this.closeDeletePopup();
-    },
-    cancelDelete() {
-      this.closeDeletePopup();
-    },
-    closeDeletePopup() {
-      this.showDeletePopup = false;
-      this.messageToDelete = null;
     },
     validateFileName(fileName, gruppenName) {
       // Format: [Gruppenname]_[Thema]_x.x
@@ -840,84 +825,6 @@ h2 {
     width: 80px;
     left: 10px;
     bottom: 10px;
-  }
-}
-
-.popup-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.popup-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 400px;
-  width: 90%;
-}
-
-.popup-content h3 {
-  margin: 0 0 1rem 0;
-  color: #2c3e50;
-}
-
-.popup-content p {
-  margin-bottom: 1.5rem;
-  color: #666;
-}
-
-.popup-buttons {
-  display: flex;
-  gap: 1rem;
-  justify-content: flex-end;
-}
-
-.popup-buttons button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.cancel-button {
-  background-color: #e0e0e0;
-  color: #666;
-}
-
-.cancel-button:hover {
-  background-color: #d0d0d0;
-}
-
-.confirm-button {
-  background-color: #dc3545;
-  color: white;
-}
-
-.confirm-button:hover {
-  background-color: #c82333;
-}
-
-@media (max-width: 480px) {
-  .popup-content {
-    padding: 1.5rem;
-  }
-
-  .popup-buttons {
-    flex-direction: column;
-  }
-
-  .popup-buttons button {
-    width: 100%;
   }
 }
 </style>
