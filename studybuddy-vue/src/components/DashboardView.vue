@@ -93,17 +93,10 @@
         </div>
       </div>
     </div>
-
-    <!-- Add this modal component at the end of the template, but before the closing div -->
-    <div v-if="showDeleteModal" class="modal-overlay">
-      <div class="modal-content">
-        <h3>Nachricht löschen</h3>
-        <p>Möchten Sie diese Nachricht wirklich löschen?</p>
-        <div class="modal-buttons">
-          <button @click="confirmDelete" class="confirm-button">Löschen</button>
-          <button @click="cancelDelete" class="cancel-button">Abbrechen</button>
-        </div>
-      </div>
+    <div class="easyname-logo">
+      <a href="https://www.easyname.at" target="_blank" rel="noopener noreferrer">
+        <img src="@/assets/Primary Logo.png" alt="Easyname Logo" />
+      </a>
     </div>
   </div>
 </template>
@@ -124,9 +117,7 @@ export default {
       searchQuery: '',
       originalMessages: [],
       profilBild: null,
-      isSidebarOpen: false,
-      showDeleteModal: false,
-      messageToDelete: null,
+      isSidebarOpen: false
     }
   },
   created() {
@@ -216,25 +207,26 @@ export default {
         message.benutzername.toLowerCase().includes(query)
       )
     },
-    deleteMessage(messageId) {
-      this.messageToDelete = messageId;
-      this.showDeleteModal = true;
-    },
-    async confirmDelete() {
+    async deleteMessage(messageId) {
+      if (!confirm('Möchten Sie diese Nachricht wirklich löschen?')) {
+        return;
+      }
+
       try {
         const response = await fetch(
-          `http://localhost:3000/api/chat/message/${this.messageToDelete}?benutzerId=${this.userId}`,
+          `http://localhost:3000/api/chat/message/${messageId}?benutzerId=${this.userId}`,
           {
             method: 'DELETE'
           }
         );
 
         if (response.ok) {
+          // Nachricht aus dem lokalen State entfernen
           this.chatMessages = this.chatMessages.filter(
-            msg => msg.pk_nachricht_id !== this.messageToDelete
+            msg => msg.pk_nachricht_id !== messageId
           );
           this.originalMessages = this.originalMessages.filter(
-            msg => msg.pk_nachricht_id !== this.messageToDelete
+            msg => msg.pk_nachricht_id !== messageId
           );
         } else {
           const error = await response.json();
@@ -243,14 +235,6 @@ export default {
       } catch (error) {
         console.error('Fehler beim Löschen der Nachricht:', error);
       }
-      this.closeDeleteModal();
-    },
-    cancelDelete() {
-      this.closeDeleteModal();
-    },
-    closeDeleteModal() {
-      this.showDeleteModal = false;
-      this.messageToDelete = null;
     },
     validateFileName(fileName, gruppenName) {
       // Format: [Gruppenname]_[Thema]_x.x
@@ -813,51 +797,30 @@ h2 {
   }
 }
 
-.modal-overlay {
+.easyname-logo {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  left: 20px;
+  bottom: 20px;
   z-index: 1000;
+  width: 100px;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
 }
 
-.modal-content {
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  max-width: 90%;
-  width: 400px;
-  text-align: center;
+.easyname-logo img {
+  width: 100%;
+  height: auto;
 }
 
-.modal-content h3 {
-  margin-top: 0;
-  color: #2c3e50;
+.easyname-logo:hover {
+  opacity: 1;
 }
 
-.modal-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-}
-
-.confirm-button, .cancel-button {
-  padding: 0.5rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 500;
-}
-
-.confirm-button {
-  background-color: #dc3545;
-  color: white;
+@media (max-width: 768px) {
+  .easyname-logo {
+    width: 80px;
+    left: 10px;
+    bottom: 10px;
+  }
 }
 </style>
