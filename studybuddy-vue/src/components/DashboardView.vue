@@ -55,9 +55,7 @@
               <div v-for="message in chatMessages" :key="message.pk_nachricht_id" class="message"
                 :class="{ 'own-message': message.pk_benutzer_id === userId }">
                 <div class="message-header">
-                  <span class="username" :style="{ color: message.pk_benutzer_id !== userId ? getUsernameColor(message.pk_benutzer_id) : 'inherit' }">
-    {{ message.benutzername }}
-  </span>
+                  <span class="username">{{ message.benutzername }}</span>
                   <div class="message-actions">
                     <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
                     <button v-if="message.pk_benutzer_id === userId" class="delete-button"
@@ -87,7 +85,18 @@
             </div>
 
             <div class="chat-input">
-              <input v-model="newMessage" @keyup.enter="sendMessage" placeholder="Nachricht eingeben..." type="text" />
+              <div class="input-wrapper">
+                <input 
+                  v-model="newMessage" 
+                  @keyup.enter="sendMessage" 
+                  placeholder="Nachricht eingeben..." 
+                  type="text"
+                  maxlength="500"
+                />
+                <span class="char-count" :class="{ 'near-limit': newMessage.length > 450 }">
+                  {{ newMessage.length }}/500
+                </span>
+              </div>
               <div class="file-upload">
                 <label class="file-upload-label">
                   <input type="file" @change="handleFileUpload" accept="*/*" class="file-input" />
@@ -210,22 +219,6 @@ export default {
         console.error('Fehler beim Senden der Nachricht:', error);
       }
     },
-  getUsernameColor(userId) {
-    // Generiert eine deterministische Farbe basierend auf der userId
-    const colors = [
-      '#FF6B6B', // rot
-      '#4ECDC4', // türkis
-      '#45B7D1', // hellblau
-      '#96CEB4', // mintgrün
-      '#D4A5A5', // altrosa
-      '#9B59B6', // lila
-      '#3498DB', // blau
-      '#E67E22', // orange
-      '#1ABC9C', // grün
-      '#CD6155'  // dunkelrot
-    ];
-    return colors[userId % colors.length];
-  },
 
     selectGruppe(gruppe) {
       this.selectedGruppe = gruppe.pk_gruppe_id
@@ -341,14 +334,6 @@ export default {
 </script>
 
 <style scoped>
-.username {
-  font-weight: bold;
-}
-
-.own-message .username {
-  color: white !important;
-}
-
 .app-container {
   display: flex;
   flex-direction: column;
@@ -1034,5 +1019,36 @@ h2 {
 
 .error-ok:hover {
   background-color: #5a6268;
+}
+
+.input-wrapper {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.input-wrapper input {
+  width: 100%;
+  padding-right: 70px; /* Platz für den Zähler */
+}
+
+.char-count {
+  position: absolute;
+  right: 10px;
+  font-size: 0.8rem;
+  color: #666;
+}
+
+.char-count.near-limit {
+  color: #e74c3c;
+}
+
+/* Anpassung für mobile Geräte */
+@media (max-width: 600px) {
+  .char-count {
+    font-size: 0.7rem;
+    right: 5px;
+  }
 }
 </style>

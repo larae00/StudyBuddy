@@ -32,7 +32,7 @@ CREATE TABLE chat (
 
 CREATE TABLE nachricht (
     PK_Nachricht_ID SERIAL PRIMARY KEY,
-    Inhalt VARCHAR(255) NOT NULL,
+    Inhalt VARCHAR(500) NOT NULL,
     Timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     chat_id INT,
     benutzer_id INT,
@@ -64,6 +64,3 @@ INSERT INTO chat (PK_Chat_ID, Bezeichnung)
 SELECT PK_Gruppe_ID, Bezeichnung || ' Chat'
 FROM inserted_gruppen;
 -- in postgres
-
-
-
