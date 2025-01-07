@@ -395,6 +395,46 @@ app.put('/api/user/:userId/profileimage', async (req, res) => {
   }
 });
 
+// GET: Ungelesene Nachrichten pro Gruppe
+app.get('/api/unread/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await pool.query(`
+      SELECT 
+        n.chat_id as gruppe_id,
+        COUNT(*) as unread_count
+      FROM nachricht n
+      JOIN benutzer_gruppe bg ON n.chat_id = bg.pk_fk_gruppe_id
+      WHERE bg.pk_fk_benutzer_id = $1
+      AND n.timestamp > bg.letzte_gelesen_zeit
+      AND n.benutzer_id != $1  -- Eigene Nachrichten ausschließen
+      GROUP BY n.chat_id
+    `, [userId]);
+
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Fehler beim Abrufen der ungelesenen Nachrichten:', error);
+    res.status(500).json({ error: 'Serverfehler' });
+  }
+});
+
+// POST: Letzte Lesezeit aktualisieren
+app.post('/api/lastread', async (req, res) => {
+  try {
+    const { userId, gruppeId } = req.body;
+    await pool.query(`
+      UPDATE benutzer_gruppe 
+      SET letzte_gelesen_zeit = NOW()
+      WHERE pk_fk_benutzer_id = $1 AND pk_fk_gruppe_id = $2
+    `, [userId, gruppeId]);
+
+    res.status(200).json({ message: 'Lesezeit aktualisiert' });
+  } catch (error) {
+    console.error('Fehler beim Aktualisieren der Lesezeit:', error);
+    res.status(500).json({ error: 'Serverfehler' });
+  }
+});
+
 // Server starten
 const PORT = 3000;
 app.listen(PORT, () => {

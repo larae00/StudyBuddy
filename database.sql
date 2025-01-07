@@ -64,3 +64,6 @@ INSERT INTO chat (PK_Chat_ID, Bezeichnung)
 SELECT PK_Gruppe_ID, Bezeichnung || ' Chat'
 FROM inserted_gruppen;
 -- in postgres
+
+ALTER TABLE benutzer_gruppe 
+ADD COLUMN letzte_gelesen_zeit TIMESTAMP DEFAULT NOW();

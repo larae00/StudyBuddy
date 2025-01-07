@@ -23,7 +23,12 @@
         <div class="gruppen-liste">
           <div v-for="gruppe in gruppen" :key="gruppe.pk_gruppe_id" class="gruppe-item"
             :class="{ 'aktiv': selectedGruppe === gruppe.pk_gruppe_id }" @click="selectGruppe(gruppe)">
-            {{ gruppe.bezeichnung }}
+            <div class="gruppe-item-content">
+              <span>{{ gruppe.bezeichnung }}</span>
+              <span v-if="unreadMessages.get(gruppe.pk_gruppe_id)" class="unread-badge">
+                {{ unreadMessages.get(gruppe.pk_gruppe_id) }}
+              </span>
+            </div>
           </div>
         </div>
         <div class="easyname-logo">
@@ -158,6 +163,7 @@ export default {
       showFileErrorPopup: false,
       fileErrorMessage: '',
       isDragging: false,
+      unreadMessages: new Map(),
     }
   },
   created() {
@@ -167,6 +173,7 @@ export default {
       this.userId = user.id
       this.profilBild = user.profilbildSpeicherort || generateInitialsImage(user.benutzername)
       this.fetchGruppen()
+      this.fetchUnreadMessages() // Neue Zeile
     }
   },
   methods: {
@@ -198,6 +205,39 @@ export default {
         }
       } catch (error) {
         console.error('Fehler beim Laden der Nachrichten:', error)
+      }
+    },
+    async fetchUnreadMessages() {
+      try {
+        const response = await fetch(`http://localhost:3000/api/unread/${this.userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          this.unreadMessages = new Map(data.map(item => [item.gruppe_id, item.unread_count]));
+        }
+      } catch (error) {
+        console.error('Fehler beim Laden der ungelesenen Nachrichten:', error);
+      }
+    },
+
+    async updateLastRead() {
+      if (!this.selectedGruppe) return;
+
+      try {
+        await fetch(`http://localhost:3000/api/lastread`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: this.userId,
+            gruppeId: this.selectedGruppe
+          })
+        });
+
+        // Zähler für aktuelle Gruppe zurücksetzen
+        this.unreadMessages.set(this.selectedGruppe, 0);
+      } catch (error) {
+        console.error('Fehler beim Aktualisieren der Lesezeit:', error);
       }
     },
     async sendMessage() {
@@ -239,9 +279,10 @@ export default {
       ];
       return colors[userId % colors.length];
     },
-    selectGruppe(gruppe) {
-      this.selectedGruppe = gruppe.pk_gruppe_id
-      this.fetchChatMessages()
+    async selectGruppe(gruppe) {
+      this.selectedGruppe = gruppe.pk_gruppe_id;
+      await this.fetchChatMessages();
+      await this.updateLastRead();
     },
     getSelectedGruppenName() {
       const gruppe = this.gruppen.find(g => g.pk_gruppe_id === this.selectedGruppe)
@@ -391,6 +432,24 @@ export default {
 </script>
 
 <style scoped>
+.gruppe-item-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.unread-badge {
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 50%;
+  padding: 2px 8px;
+  font-size: 0.8rem;
+  min-width: 20px;
+  text-align: center;
+  margin-left: 8px;
+}
+
 .username {
   font-weight: bold;
 }
