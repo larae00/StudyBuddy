@@ -2,6 +2,7 @@
   <div class="register-container">
     <div class="register-box">
       <h2>Registrierung</h2>
+      
       <form @submit.prevent="handleRegister">
         <div class="form-group">
           <input type="text" v-model="vorname" placeholder="Vorname" required />
@@ -21,7 +22,18 @@
             <i :class="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
           </button>
         </div>
+
         <div class="error" v-if="error">{{ error }}</div>
+        <div class="password-guidelines">
+        <h3>Passwortrichtlinien:</h3>
+        <ul>
+          <li>Mindestens 8 Zeichen</li>
+          <li>Mindestens ein Großbuchstabe</li>
+          <li>Mindestens ein Kleinbuchstabe</li>
+          <li>Mindestens eine Zahl</li>
+          <li>Mindestens ein Sonderzeichen</li>
+        </ul>
+      </div>
         <button type="submit">Registrieren</button>
       </form>
       <p class="login-link">
@@ -177,5 +189,30 @@ a {
 
 .password-group input {
   padding-right: 45px;
+}
+
+.password-guidelines {
+  background-color: #f8f9fa;
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e9ecef;
+}
+
+.password-guidelines h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.password-guidelines ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  color: #6c757d;
+}
+
+.password-guidelines li {
+  margin: 0.2rem 0;
+  font-size: 0.9rem;
 }
 </style>
