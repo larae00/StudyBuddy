@@ -109,6 +109,16 @@
         </div>
       </div>
     </div>
+
+    <div v-if="showFileErrorPopup" class="error-popup-overlay">
+      <div class="error-popup">
+        <h3>Ungültiger Dateiname</h3>
+        <p>{{ fileErrorMessage }}</p>
+        <div class="error-popup-actions">
+          <button @click="closeFileErrorPopup" class="error-ok">OK</button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -131,6 +141,8 @@ export default {
       isSidebarOpen: false,
       showDeletePopup: false,
       messageToDelete: null,
+      showFileErrorPopup: false,
+    fileErrorMessage: ''
     }
   },
   created() {
@@ -268,9 +280,10 @@ export default {
 
       const gruppenName = this.getSelectedGruppenName();
       if (!this.validateFileName(file.name, gruppenName)) {
-        alert(`Die Datei muss dem Format "${gruppenName}_Thema_x.x" entsprechen.\nBeispiel: ${gruppenName}_Test1_1.0`);
-        event.target.value = ''; // Reset file input
-        return;
+        this.fileErrorMessage = `Die Datei muss dem Format "${gruppenName}_Thema_x.x" entsprechen.\nBeispiel: ${gruppenName}_Test1_1.0`;
+    this.showFileErrorPopup = true;
+    event.target.value = ''; // Reset file input
+    return;
       }
 
       try {
@@ -292,6 +305,10 @@ export default {
       }
 
     },
+    closeFileErrorPopup() {
+  this.showFileErrorPopup = false;
+  this.fileErrorMessage = '';
+},
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
     }
@@ -939,5 +956,56 @@ h2 {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
   }
+}
+
+.error-popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.error-popup {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  width: 90%;
+}
+
+.error-popup h3 {
+  margin-top: 0;
+  color: #e74c3c;
+}
+
+.error-popup p {
+  margin: 1rem 0;
+  white-space: pre-line;
+}
+
+.error-popup-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+.error-ok {
+  background-color: #5D83B1;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.error-ok:hover {
+  background-color: #4a698d;
 }
 </style>
