@@ -4,9 +4,9 @@
       <h2 class="profile-title">Mein Profil</h2>
       <div class="profile-info">
         <div class="profile-image-section">
-          <div class="profile-image-container">
+          <div class="profile-image-container" @click="triggerFileInput">
             <img :src="profilBild" alt="Profilbild" class="profile-image" />
-            <div class="image-upload-overlay" @click="triggerFileInput">
+            <div class="image-upload-overlay">
               <i class="fas fa-camera"></i>
               <span>Bild ändern</span>
             </div>
@@ -150,15 +150,19 @@ export default {
   width: 200px;
   height: 200px;
   margin: 0 auto;
+  display: flex;
+  align-content: center;
+  align-items: center;
+  justify-content: space-around;
 }
 
 .profile-image-container {
-  width: 100%;
-  height: 100%;
+  position: relative;
+  width: 150px;
+  height: 150px;
   border-radius: 50%;
   overflow: hidden;
-  position: relative;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
 
 .user-details {
@@ -228,16 +232,18 @@ button {
 
 .image-upload-overlay {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
   right: 0;
-  background: rgba(0, 0, 0, 0.7);
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   color: white;
-  padding: 1rem;
-  text-align: center;
-  cursor: pointer;
   opacity: 0;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s;
 }
 
 .profile-image-container:hover .image-upload-overlay {
@@ -248,6 +254,7 @@ button {
   font-size: 1.5rem;
   margin-bottom: 0.5rem;
 }
+
 
 .profile-image {
   width: 100%;
