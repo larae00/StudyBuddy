@@ -981,12 +981,13 @@ h2 {
 }
 
 .error-popup h3 {
-  margin-top: 0;
+  font-size: 1.1rem;
   color: #e74c3c;
 }
 
 .error-popup p {
   margin: 1rem 0;
+  color: #666;
   white-space: pre-line;
 }
 
@@ -997,7 +998,7 @@ h2 {
 }
 
 .error-ok {
-  background-color: #5D83B1;
+  background-color: #6c757d;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -1006,6 +1007,6 @@ h2 {
 }
 
 .error-ok:hover {
-  background-color: #4a698d;
+  background-color: #5a6268;
 }
 </style>
