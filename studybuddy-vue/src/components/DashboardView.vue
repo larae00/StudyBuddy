@@ -50,14 +50,20 @@
           <h2>{{ getSelectedGruppenName() }}</h2>
 
           <!-- Chat-Bereich -->
-          <div class="chat-container">
+          <div class="chat-container" 
+               @dragover.prevent="handleDragOver"
+               @dragleave.prevent="handleDragLeave"
+               @drop.prevent="handleFileDrop"
+               :class="{ 'drag-active': isDragging }">
+            <div v-if="isDragging" class="drag-overlay">
+              <i class="fas fa-cloud-upload-alt"></i>
+              <span>Datei hier hochladen</span>
+            </div>
             <div class="chat-messages" ref="chatMessages">
               <div v-for="message in chatMessages" :key="message.pk_nachricht_id" class="message"
                 :class="{ 'own-message': message.pk_benutzer_id === userId }">
                 <div class="message-header">
-                  <span class="username" :style="{ color: message.pk_benutzer_id !== userId ? getUsernameColor(message.pk_benutzer_id) : 'inherit' }">
-    {{ message.benutzername }}
-  </span>
+                  <span class="username">{{ message.benutzername }}</span>
                   <div class="message-actions">
                     <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
                     <button v-if="message.pk_benutzer_id === userId" class="delete-button"
@@ -87,18 +93,10 @@
             </div>
 
             <div class="chat-input">
-              <div class="input-wrapper">
-                <input 
-                  v-model="newMessage" 
-                  @keyup.enter="sendMessage" 
-                  placeholder="Nachricht eingeben..." 
-                  type="text"
-                  maxlength="500"
-                />
-                <span class="char-count" :class="{ 'near-limit': newMessage.length > 450 }">
-                  {{ newMessage.length }}/500
-                </span>
-              </div>
+              <input v-model="newMessage" 
+                     @keyup.enter="sendMessage" 
+                     placeholder="Nachricht eingeben..." 
+                     type="text" />
               <div class="file-upload">
                 <label class="file-upload-label">
                   <input type="file" @change="handleFileUpload" accept="*/*" class="file-input" />
@@ -155,7 +153,8 @@ export default {
       showDeletePopup: false,
       messageToDelete: null,
       showFileErrorPopup: false,
-    fileErrorMessage: ''
+      fileErrorMessage: '',
+      isDragging: false,
     }
   },
   created() {
@@ -221,22 +220,7 @@ export default {
         console.error('Fehler beim Senden der Nachricht:', error);
       }
     },
-    getUsernameColor(userId) {
-    // Generiert eine deterministische Farbe basierend auf der userId
-    const colors = [
-      '#FF6B6B', // rot
-      '#4ECDC4', // türkis
-      '#45B7D1', // hellblau
-      '#96CEB4', // mintgrün
-      '#D4A5A5', // altrosa
-      '#9B59B6', // lila
-      '#3498DB', // blau
-      '#E67E22', // orange
-      '#1ABC9C', // grün
-      '#CD6155'  // dunkelrot
-    ];
-    return colors[userId % colors.length];
-  },
+
     selectGruppe(gruppe) {
       this.selectedGruppe = gruppe.pk_gruppe_id
       this.fetchChatMessages()
@@ -339,7 +323,45 @@ export default {
 },
     toggleSidebar() {
       this.isSidebarOpen = !this.isSidebarOpen;
-    }
+    },
+    handleDragOver() {
+      this.isDragging = true;
+    },
+    handleDragLeave(event) {
+      // Prüfen ob wir wirklich den Container verlassen und nicht nur über ein Kind-Element gehen
+      if (event.currentTarget.contains(event.relatedTarget)) return;
+      this.isDragging = false;
+    },
+    handleFileDrop(event) {
+      this.isDragging = false;
+      const file = event.dataTransfer.files[0];
+      if (!file) return;
+
+      const gruppenName = this.getSelectedGruppenName();
+      if (!this.validateFileName(file.name, gruppenName)) {
+        this.fileErrorMessage = `Die Datei muss dem Format "${gruppenName}_Thema_x.x" entsprechen.\nBeispiel: ${gruppenName}_Test1_1.0`;
+        this.showFileErrorPopup = true;
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('benutzerId', this.userId);
+      formData.append('gruppeId', this.selectedGruppe);
+
+      fetch('http://localhost:3000/api/dokument', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => {
+        if (response.ok) {
+          this.fetchChatMessages();
+        }
+      })
+      .catch(error => {
+        console.error('Fehler beim Hochladen der Datei:', error);
+      });
+    },
   },
   watch: {
     selectedGruppe() {
@@ -351,14 +373,6 @@ export default {
 </script>
 
 <style scoped>
-.username {
-  font-weight: bold;
-}
-
-.own-message .username {
-  color: white !important;
-}
-
 .app-container {
   display: flex;
   flex-direction: column;
@@ -479,6 +493,7 @@ h2 {
   border: 1px solid #ddd;
   border-radius: 8px;
   min-height: 0;
+  position: relative;
 }
 
 .chat-messages {
@@ -1046,34 +1061,40 @@ h2 {
   background-color: #5a6268;
 }
 
-.input-wrapper {
-  position: relative;
-  flex: 1;
-  display: flex;
-  align-items: center;
+.drag-active {
+  border: 2px dashed #5D83B1 !important;
+  background-color: rgba(93, 131, 177, 0.05);
 }
 
-.input-wrapper input {
-  width: 100%;
-  padding-right: 70px; /* Platz für den Zähler */
-}
-
-.char-count {
+.drag-overlay {
   position: absolute;
-  right: 10px;
-  font-size: 0.8rem;
-  color: #666;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  color: #5D83B1;
+  z-index: 10;
 }
 
-.char-count.near-limit {
-  color: #e74c3c;
+.drag-overlay i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
 }
 
-/* Anpassung für mobile Geräte */
-@media (max-width: 600px) {
-  .char-count {
-    font-size: 0.7rem;
-    right: 5px;
+/* Responsive styles */
+@media (max-width: 768px) {
+  .drag-overlay {
+    font-size: 1.2rem;
+  }
+  
+  .drag-overlay i {
+    font-size: 2.5rem;
   }
 }
 </style>
