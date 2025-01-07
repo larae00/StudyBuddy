@@ -11,21 +11,20 @@ export function generateInitialsImage(username) {
   // Text-Einstellungen
   const initial = username.charAt(0).toUpperCase();
   context.fillStyle = 'white';
-  context.font = 'bold 80px Arial';  // Schriftgröße reduziert
+  context.font = 'bold 80px Arial';
   context.textAlign = 'center';
   context.textBaseline = 'middle';
 
-  // Exakte Zentrierung
-  const centerX = canvas.width / 2;
-  const centerY = canvas.height / 2;
-
-  // Text-Metrics für vertikale Zentrierung
+  // Text-Metrics berechnen
   const metrics = context.measureText(initial);
-  const actualHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
-  const adjustment = actualHeight / 2;
+  const fontHeight = metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent;
+  
+  // Exakte Zentrierung mit Berücksichtigung der Buchstabenhöhe
+  const centerX = canvas.width / 2;
+  const centerY = (canvas.height - fontHeight) / 2 + metrics.actualBoundingBoxAscent;
 
   // Text zeichnen
-  context.fillText(initial, centerX, centerY + adjustment);
+  context.fillText(initial, centerX, centerY);
 
   return canvas.toDataURL('image/png');
 }
