@@ -55,7 +55,9 @@
               <div v-for="message in chatMessages" :key="message.pk_nachricht_id" class="message"
                 :class="{ 'own-message': message.pk_benutzer_id === userId }">
                 <div class="message-header">
-                  <span class="username">{{ message.benutzername }}</span>
+                  <span class="username" :style="{ color: message.pk_benutzer_id !== userId ? getUsernameColor(message.pk_benutzer_id) : 'inherit' }">
+    {{ message.benutzername }}
+  </span>
                   <div class="message-actions">
                     <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
                     <button v-if="message.pk_benutzer_id === userId" class="delete-button"
@@ -219,7 +221,22 @@ export default {
         console.error('Fehler beim Senden der Nachricht:', error);
       }
     },
-
+    getUsernameColor(userId) {
+    // Generiert eine deterministische Farbe basierend auf der userId
+    const colors = [
+      '#FF6B6B', // rot
+      '#4ECDC4', // türkis
+      '#45B7D1', // hellblau
+      '#96CEB4', // mintgrün
+      '#D4A5A5', // altrosa
+      '#9B59B6', // lila
+      '#3498DB', // blau
+      '#E67E22', // orange
+      '#1ABC9C', // grün
+      '#CD6155'  // dunkelrot
+    ];
+    return colors[userId % colors.length];
+  },
     selectGruppe(gruppe) {
       this.selectedGruppe = gruppe.pk_gruppe_id
       this.fetchChatMessages()
@@ -334,6 +351,14 @@ export default {
 </script>
 
 <style scoped>
+.username {
+  font-weight: bold;
+}
+
+.own-message .username {
+  color: white !important;
+}
+
 .app-container {
   display: flex;
   flex-direction: column;
