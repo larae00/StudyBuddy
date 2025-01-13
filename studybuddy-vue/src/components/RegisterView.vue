@@ -25,15 +25,30 @@
 
         <div class="error" v-if="error">{{ error }}</div>
         <div class="password-guidelines">
-        <h3>Passwortrichtlinien:</h3>
-        <ul>
-          <li>Mindestens 8 Zeichen</li>
-          <li>Mindestens ein Großbuchstabe</li>
-          <li>Mindestens ein Kleinbuchstabe</li>
-          <li>Mindestens eine Zahl</li>
-          <li>Mindestens ein Sonderzeichen</li>
-        </ul>
-      </div>
+          <h3>Passwortrichtlinien:</h3>
+          <ul>
+            <li :class="{ 'valid': passwordChecks.minLength, 'invalid': !passwordChecks.minLength }">
+              <i :class="passwordChecks.minLength ? 'fas fa-check' : 'fas fa-times'"></i>
+              Mindestens 8 Zeichen
+            </li>
+            <li :class="{ 'valid': passwordChecks.hasUpperCase, 'invalid': !passwordChecks.hasUpperCase }">
+              <i :class="passwordChecks.hasUpperCase ? 'fas fa-check' : 'fas fa-times'"></i>
+              Mindestens ein Großbuchstabe
+            </li>
+            <li :class="{ 'valid': passwordChecks.hasLowerCase, 'invalid': !passwordChecks.hasLowerCase }">
+              <i :class="passwordChecks.hasLowerCase ? 'fas fa-check' : 'fas fa-times'"></i>
+              Mindestens ein Kleinbuchstabe
+            </li>
+            <li :class="{ 'valid': passwordChecks.hasNumbers, 'invalid': !passwordChecks.hasNumbers }">
+              <i :class="passwordChecks.hasNumbers ? 'fas fa-check' : 'fas fa-times'"></i>
+              Mindestens eine Zahl
+            </li>
+            <li :class="{ 'valid': passwordChecks.hasSpecialChar, 'invalid': !passwordChecks.hasSpecialChar }">
+              <i :class="passwordChecks.hasSpecialChar ? 'fas fa-check' : 'fas fa-times'"></i>
+              Mindestens ein Sonderzeichen
+            </li>
+          </ul>
+        </div>
         <button type="submit">Registrieren</button>
       </form>
       <p class="login-link">
@@ -58,32 +73,32 @@ export default {
       email: '',
       passwort: '',
       error: null,
-      showPassword: false
+      showPassword: false,
+      passwordChecks: {
+        minLength: false,
+        hasUpperCase: false,
+        hasLowerCase: false,
+        hasNumbers: false,
+        hasSpecialChar: false
+      }
+    }
+  },
+  watch: {
+    passwort: {
+      handler(newPassword) {
+        this.passwordChecks = {
+          minLength: newPassword.length >= 8,
+          hasUpperCase: /[A-Z]/.test(newPassword),
+          hasLowerCase: /[a-z]/.test(newPassword),
+          hasNumbers: /\d/.test(newPassword),
+          hasSpecialChar: /[!@#$%^&*(),.?":{}|<>]/.test(newPassword)
+        }
+      },
+      immediate: true
     }
   },
   methods: {
-    validatePassword(password) {
-      const minLength = password.length >= 8;
-      const hasUpperCase = /[A-Z]/.test(password);
-      const hasLowerCase = /[a-z]/.test(password);
-      const hasNumbers = /\d/.test(password);
-      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
-
-      if (!minLength) return 'Das Passwort muss mindestens 8 Zeichen lang sein.';
-      if (!hasUpperCase) return 'Das Passwort muss mindestens einen Großbuchstaben enthalten.';
-      if (!hasLowerCase) return 'Das Passwort muss mindestens einen Kleinbuchstaben enthalten.';
-      if (!hasNumbers) return 'Das Passwort muss mindestens eine Zahl enthalten.';
-      if (!hasSpecialChar) return 'Das Passwort muss mindestens ein Sonderzeichen enthalten.';
-
-      return null;
-    },
-
     async handleRegister() {
-      const passwordError = this.validatePassword(this.passwort);
-      if (passwordError) {
-        this.error = passwordError;
-        return;
-      }
       try {
         const profilbild = generateInitialsImage(this.benutzername);
 
@@ -206,13 +221,38 @@ a {
 }
 
 .password-guidelines ul {
+  list-style: none;
   margin: 0;
-  padding-left: 1.2rem;
-  color: #6c757d;
+  padding: 0;
 }
 
 .password-guidelines li {
-  margin: 0.2rem 0;
+  margin: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-size: 0.9rem;
+  transition: color 0.3s ease;
+}
+
+.password-guidelines li i {
+  width: 16px;
+  text-align: center;
+}
+
+.password-guidelines li.valid {
+  color: #28a745;
+}
+
+.password-guidelines li.invalid {
+  color: #dc3545;
+}
+
+.password-guidelines li.valid i {
+  color: #28a745;
+}
+
+.password-guidelines li.invalid i {
+  color: #dc3545;
 }
 </style>
