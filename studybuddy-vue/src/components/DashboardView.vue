@@ -73,7 +73,7 @@
                     <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
                     <button v-if="message.pk_benutzer_id === userId" class="delete-button"
                       @click="deleteMessage(message.pk_nachricht_id)">
-                      
+                      ×
                     </button>
                   </div>
                 </div>
