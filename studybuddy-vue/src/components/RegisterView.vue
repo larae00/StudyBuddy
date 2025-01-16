@@ -98,7 +98,27 @@ export default {
     }
   },
   methods: {
+    validatePassword(password) {
+      const minLength = password.length >= 8;
+      const hasUpperCase = /[A-Z]/.test(password);
+      const hasLowerCase = /[a-z]/.test(password);
+      const hasNumbers = /\d/.test(password);
+      const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+      if (!minLength) return 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+      if (!hasUpperCase) return 'Das Passwort muss mindestens einen Großbuchstaben enthalten.';
+      if (!hasLowerCase) return 'Das Passwort muss mindestens einen Kleinbuchstaben enthalten.';
+      if (!hasNumbers) return 'Das Passwort muss mindestens eine Zahl enthalten.';
+      if (!hasSpecialChar) return 'Das Passwort muss mindestens ein Sonderzeichen enthalten.';
+
+      return null;
+    },
     async handleRegister() {
+      const passwordError = this.validatePassword(this.passwort);
+      if (passwordError) {
+        this.error = passwordError;
+        return;
+      }
       try {
         const profilbild = generateInitialsImage(this.benutzername);
 
