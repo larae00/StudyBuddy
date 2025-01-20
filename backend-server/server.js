@@ -360,6 +360,8 @@ app.get('/api/dokument/:nachrichtId', async (req, res) => {
     res.status(500).json({ error: 'Serverfehler beim Herunterladen des Dokuments' });
   }
 });
+//ben
+
 
 // PUT: Profilbild aktualisieren
 app.put('/api/user/:userId/profileimage', async (req, res) => {
