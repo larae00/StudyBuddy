@@ -15,10 +15,10 @@ app.use(fileUpload());
 
 // PostgreSQL-Konfiguration
 const pool = new Pool({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'studybuddy',
-  password: 'Studybuddy',
+  user: 'u242456db1',
+  host: 'e156338-pgsql.services.easyname.eu',
+  database: 'u242456db1',
+  password: '.gksp87pcsvi',
   port: 5432,
 });
 
